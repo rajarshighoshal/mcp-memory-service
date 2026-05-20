@@ -222,4 +222,9 @@ certs/key.pem
 
 # LoCoMo benchmark data (downloaded on demand)
 data/locomo/
-results/benchmarks/
+results/
+
+# Generated statistics (regenerate with docs/statistics/generate_charts.py)
+docs/statistics/charts/
+docs/statistics/data/
+docs/statistics/REPOSITORY_STATISTICS.md
