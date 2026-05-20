@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.63.0] - 2026-05-20
+
+### Added
+
+- **feat(milvus): low-priority optional overrides — completes Issue #888** ([#978](https://github.com/doobidoo/mcp-memory-service/pull/978), closes [#888](https://github.com/doobidoo/mcp-memory-service/issues/888), @henry201605): Implements the final 4 native Milvus overrides to fully complete Issue #888. `search_by_tag_chronological` pushes tag filter + `sort_desc_key=created_at` to Milvus via `_query_memories` (replaces base-class fetch-all-then-sort fallback, supports pagination). `count_memories_by_tag` uses Milvus `count(*)` query with tag filter (replaces fetch-all-then-len fallback). `is_deleted` checks `metadata.deleted_at` field (returns False if memory not found). `purge_deleted` queries memories with `created_at <= cutoff`, filters those with `deleted_at` in metadata, and hard-deletes tombstones. 17 new mock-based unit tests across 4 test classes.
+
+### Fixed
+
+- **fix(harvest): support Kiro CLI `AssistantMessage` kind + raise system-content threshold to 10k** ([#979](https://github.com/doobidoo/mcp-memory-service/pull/979), closes [#972](https://github.com/doobidoo/mcp-memory-service/issues/972), @filhocf): Adds `"AssistantMessage": "assistant"` to `KIRO_KIND_MAP` so Kiro CLI assistant messages (which use this kind, not `Response`) are correctly parsed. Removes the redundant `len(text) > 2000` filter in `_is_system_content` (already capped at `MAX_CANDIDATE_CONTENT_LENGTH = 500` in extractor). Result: parse yield increases from 1 candidate per 71 messages to 36 candidates per 373 messages.
+
 ## [10.62.0] - 2026-05-20
 
 ### Added

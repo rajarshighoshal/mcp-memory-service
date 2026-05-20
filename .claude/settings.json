@@ -1,6 +1,13 @@
 {
-  "enabledPlugins": {
-    "superpowers@claude-plugins-official": true
+  "permissions": {
+    "allow": [
+      "Read(//Users/hkr/GitHub/MCP-Context-Provider/instincts/**)",
+      "Skill(superpowers:using-superpowers)",
+      "Skill(superpowers:using-superpowers:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/hkr/GitHub/MCP-Context-Provider/instincts"
+    ]
   },
   "hooks": {
     "PostToolUse": [
@@ -16,5 +23,8 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
   }
 }

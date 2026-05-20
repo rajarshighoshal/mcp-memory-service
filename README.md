@@ -496,17 +496,18 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.62.0** (May 20, 2026)
+## Latest Release: **v10.63.0** (May 20, 2026)
 
-**Minor: Native Milvus search_memories, retrieve_with_quality_boost, recall_memory**
+**Minor: Milvus low-priority overrides (completes #888) + Kiro CLI harvest fix**
 
 **What's New:**
-- `feat(milvus)`: Native `search_memories`, `retrieve_with_quality_boost`, and `recall_memory` with server-side filter pushdown — completes medium-priority methods from #888 (@henry201605, PR #970)
-- `fix(hooks)`: Parse Claude Code transcripts as JSONL with nested `message` — restores transcript-based memory capture (PR #971)
+- `feat(milvus)`: Completes Issue #888 — `search_by_tag_chronological`, `count_memories_by_tag`, `is_deleted`, `purge_deleted` natively implemented with server-side filter pushdown (@henry201605, PR #978)
+- `fix(harvest)`: Kiro CLI `AssistantMessage` kind support + remove redundant 2000-char filter — parse yield 36x improvement (@filhocf, PR #979)
 
 ---
 
 **Previous Releases**:
+- **v10.62.0** - feat(milvus): native search_memories + retrieve_with_quality_boost + recall_memory (server-side filter pushdown, completes medium-priority #888) + fix(hooks): JSONL transcript parsing (PRs #970, #971)
 - **v10.61.0** - feat(milvus): native update_memory + update_memories_batch (1 round-trip batch upsert) + feat(sse): Last-Event-ID replay on /api/events reconnect (PRs #966, #953)
 - **v10.60.2** - fix(milvus): replace ANN search() with brute-force query() in semantic dedup — fixes Milvus Lite growing-segment visibility bug (#964, closes #938, @henry201605)
 - **v10.60.1** - fix(milvus): tag_match param in get_all_memories/count_all_memories + fix(hooks): session-end port fallback + fix(consolidation): repair contradiction detection (PRs #958, #960, #961)

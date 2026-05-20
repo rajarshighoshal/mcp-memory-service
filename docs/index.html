@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Memory for AI Agents — REST, MCP, OAuth, CLI · mcp-memory-service v10.62.0</title>
+<title>Memory for AI Agents — REST, MCP, OAuth, CLI · mcp-memory-service v10.63.0</title>
 <meta name="description" content="Memory layer for AI agents. REST API + MCP + OAuth + CLI + dashboard — one self-hosted service, every transport. 14+ client integrations, knowledge graph, automatic consolidation. LongMemEval R@5 86%, session ingestion, zero cloud cost.">
-<meta property="og:title" content="MCP Memory Service v10.62.0">
-<meta property="og:description" content="Native Milvus search_memories, retrieve_with_quality_boost, recall_memory with server-side filter pushdown. Self-hosted AI memory — REST, MCP, OAuth 2.1, CLI. LongMemEval R@5 86%.">
+<meta property="og:title" content="MCP Memory Service v10.63.0">
+<meta property="og:description" content="Milvus low-priority overrides completing Issue #888 + Kiro CLI harvest fix with 36x parse yield improvement. Self-hosted AI memory — REST, MCP, OAuth 2.1, CLI. LongMemEval R@5 86%.">
 <meta property="og:type" content="website">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -116,7 +116,7 @@ footer a{color:var(--cyan)}
 <!-- Hero -->
 <header class="hero">
   <img src="brain-icon.png" alt="Memory for AI Agents" class="hero-logo">
-  <span class="hero-badge">mcp-memory-service v10.62 &mdash; Now Available</span>
+  <span class="hero-badge">mcp-memory-service v10.63 &mdash; Now Available</span>
   <h1>Memory for AI Agents</h1>
   <p>Persistent memory for AI agents &mdash; REST API, MCP, OAuth, CLI, dashboard. Semantic search, knowledge graph, automatic consolidation. One self-hosted service, every transport.</p>
   <div class="hero-buttons">
@@ -136,23 +136,23 @@ footer a{color:var(--cyan)}
 <!-- Features -->
 <section id="features">
   <div class="container">
-    <h2 class="section-title">What's New in v10.62</h2>
-    <p class="section-subtitle">Native Milvus search_memories with server-side filter pushdown, hooks JSONL transcript fix, and dep updates. ~1,968 tests.</p>
+    <h2 class="section-title">What's New in v10.63</h2>
+    <p class="section-subtitle">Milvus Issue #888 fully complete + Kiro CLI harvest fix with 36x parse yield improvement. ~1,985 tests.</p>
     <div class="features-grid">
       <div class="feature-card" data-delay="0">
         <div class="feature-icon consolidation">&#128269;</div>
-        <h3>Native Milvus Search with Filter Pushdown</h3>
-        <p>Milvus backend now overrides <code>search_memories</code>, <code>retrieve_with_quality_boost</code>, and <code>recall_memory</code>. Filters (tag, type, date) are pushed to the Milvus server inside the ANN call &mdash; no more N round-trip fallbacks to the base class. Completes the medium-priority method set from issue #888.</p>
+        <h3>Milvus Issue #888 Complete</h3>
+        <p>The final 4 low-priority Milvus overrides are now native: <code>search_by_tag_chronological</code> (tag filter + server-side sort + pagination), <code>count_memories_by_tag</code> (Milvus <code>count(*)</code>), <code>is_deleted</code> (metadata check), and <code>purge_deleted</code> (hard-delete tombstones). All 9 optional BaseStorage methods now have native implementations, eliminating all base-class fallbacks.</p>
       </div>
       <div class="feature-card" data-delay="150">
         <div class="feature-icon http">&#128736;</div>
-        <h3>Hooks JSONL Transcript Parsing</h3>
-        <p>Claude Code transcript format changed to JSONL with a <code>message</code> wrapper. The auto-capture hook now correctly unwraps each line before extracting tool calls, restoring transcript-based memory capture for current Claude Code versions.</p>
+        <h3>Kiro CLI Harvest Fix</h3>
+        <p>Kiro CLI uses <code>AssistantMessage</code> as the message kind (not <code>Response</code>). The harvest parser now maps this correctly and removes a redundant 2000-char filter. Parse yield for Kiro sessions improves 36x: 1 candidate per 71 messages to 36 candidates per 373 messages.</p>
       </div>
       <div class="feature-card" data-delay="300">
         <div class="feature-icon privacy">&#128260;</div>
-        <h3>Quality-Boosted Retrieval</h3>
-        <p><code>retrieve_with_quality_boost</code> re-ranks results by blending embedding similarity with stored quality scores server-side. <code>recall_memory</code> adds temporal recency weighting. Both use Milvus native ANN search for full performance.</p>
+        <h3>Community Contributions</h3>
+        <p>Both improvements in this release come from community contributors: @henry201605 (Milvus overrides, PR #978) and @filhocf (Kiro CLI harvest fix, PR #979). Together they complete a major milestone for Milvus users and significantly improve Kiro IDE integration.</p>
       </div>
     </div>
   </div>
@@ -242,7 +242,7 @@ footer a{color:var(--cyan)}
       <a href="blog/remote-mcp-tutorial.html" class="btn btn-secondary">
         Blog: 5-Min claude.ai Setup
       </a>
-      <a href="https://github.com/doobidoo/mcp-memory-service/releases/tag/v10.62.0" class="btn btn-secondary" target="_blank">
+      <a href="https://github.com/doobidoo/mcp-memory-service/releases/tag/v10.63.0" class="btn btn-secondary" target="_blank">
         Release Notes
       </a>
     </div>
