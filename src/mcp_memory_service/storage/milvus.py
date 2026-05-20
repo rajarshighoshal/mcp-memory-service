@@ -2524,8 +2524,8 @@ class MilvusMemoryStorage(MemoryStorage):
         try:
             from ..utils.time_parser import parse_time_expression
             start_time, end_time = parse_time_expression(query)
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Failed to parse time expression from query, falling back to standard retrieve: %s", exc)
 
         if start_time is not None or end_time is not None:
             # Build time filter for Milvus
@@ -2596,8 +2596,8 @@ class MilvusMemoryStorage(MemoryStorage):
             try:
                 from ..utils.time_parser import parse_time_expression
                 start_time, end_time = parse_time_expression(time_expr)
-            except Exception:  # noqa: BLE001
-                pass
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Failed to parse time_expr '%s', ignoring time filter: %s", time_expr, exc)
 
         if not time_expr:
             if after:
@@ -2638,22 +2638,42 @@ class MilvusMemoryStorage(MemoryStorage):
             if not query:
                 return {"memories": [], "total": 0, "query": query, "mode": mode,
                         "error": "query required for exact mode"}
-            matched_memories = await self.get_by_exact_content(query)
-            results = [
-                MemoryQueryResult(memory=m, relevance_score=1.0, debug_info=None)
-                for m in matched_memories
-            ]
-            pre_filter_count = len(results)
-            # Apply time/tag post-filter for exact mode (can't push to Milvus text search)
-            if start_time is not None:
-                results = [r for r in results if r.memory.created_at and r.memory.created_at >= start_time]
-            if end_time is not None:
-                results = [r for r in results if r.memory.created_at and r.memory.created_at <= end_time]
-            if tags:
-                if tag_match == "all":
-                    results = [r for r in results if all(t in r.memory.tags for t in tags)]
-                else:
-                    results = [r for r in results if any(t in r.memory.tags for t in tags)]
+
+            if self._has_content_lower and combined_filter:
+                # Push all filters (content + time + tags) to Milvus in one query
+                needle = query.lower().replace('"', '\\"')
+                content_filter = f'content_lower like "%{needle}%"'
+                final_filter = (
+                    f"({combined_filter}) and ({content_filter})"
+                    if combined_filter else content_filter
+                )
+                matched_memories = await self._query_memories(
+                    filter_expr=final_filter,
+                    limit=_MILVUS_MAX_LIMIT,
+                    sort_desc_key="created_at",
+                )
+                results = [
+                    MemoryQueryResult(memory=m, relevance_score=1.0, debug_info=None)
+                    for m in matched_memories
+                ]
+                pre_filter_count = len(results)
+            else:
+                # Fallback: fetch by content, then post-filter
+                matched_memories = await self.get_by_exact_content(query)
+                results = [
+                    MemoryQueryResult(memory=m, relevance_score=1.0, debug_info=None)
+                    for m in matched_memories
+                ]
+                pre_filter_count = len(results)
+                if start_time is not None:
+                    results = [r for r in results if r.memory.created_at and r.memory.created_at >= start_time]
+                if end_time is not None:
+                    results = [r for r in results if r.memory.created_at and r.memory.created_at <= end_time]
+                if tags:
+                    if tag_match == "all":
+                        results = [r for r in results if all(t in r.memory.tags for t in tags)]
+                    else:
+                        results = [r for r in results if any(t in r.memory.tags for t in tags)]
 
         elif mode in ("semantic", "hybrid"):
             if not query and not combined_filter:
@@ -2668,11 +2688,7 @@ class MilvusMemoryStorage(MemoryStorage):
                             "error": "Failed to generate query embedding"}
 
                 fetch_n = self._retrieve_fetch_limit(fetch_limit, combined_filter)
-                if self._has_bm25 and mode == "hybrid":
-                    hits = await self._run_hybrid_search(
-                        query, query_embedding, combined_filter, fetch_n
-                    )
-                elif self._has_bm25:
+                if self._has_bm25:
                     hits = await self._run_hybrid_search(
                         query, query_embedding, combined_filter, fetch_n
                     )
