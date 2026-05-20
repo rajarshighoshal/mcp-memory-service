@@ -496,16 +496,18 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.61.0** (May 19, 2026)
+## Latest Release: **v10.62.0** (May 20, 2026)
 
-**Minor: Native Milvus update_memory and update_memories_batch**
+**Minor: Native Milvus search_memories, retrieve_with_quality_boost, recall_memory**
 
 **What's New:**
-- `feat(milvus)`: Native `update_memory` (delegates to `update_memory_metadata`) and `update_memories_batch` (single batch fetch + embed + upsert — 1 round-trip instead of N) — part of #888 (@henry201605, PR #966)
+- `feat(milvus)`: Native `search_memories`, `retrieve_with_quality_boost`, and `recall_memory` with server-side filter pushdown — completes medium-priority methods from #888 (@henry201605, PR #970)
+- `fix(hooks)`: Parse Claude Code transcripts as JSONL with nested `message` — restores transcript-based memory capture (PR #971)
 
 ---
 
 **Previous Releases**:
+- **v10.61.0** - feat(milvus): native update_memory + update_memories_batch (1 round-trip batch upsert) + feat(sse): Last-Event-ID replay on /api/events reconnect (PRs #966, #953)
 - **v10.60.2** - fix(milvus): replace ANN search() with brute-force query() in semantic dedup — fixes Milvus Lite growing-segment visibility bug (#964, closes #938, @henry201605)
 - **v10.60.1** - fix(milvus): tag_match param in get_all_memories/count_all_memories + fix(hooks): session-end port fallback + fix(consolidation): repair contradiction detection (PRs #958, #960, #961)
 - **v10.60.0** - feat(consolidation): temporal contradiction detection + fix(milvus): instance-level graph cache + fix(hooks): tunnel/reverse-proxy port fix + feat(benchmarks): mem0 adapter (PRs #949, #954, #948, #952)

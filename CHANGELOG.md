@@ -10,6 +10,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.62.0] - 2026-05-20
+
+### Added
+
+- **feat(milvus): native `search_memories`, `retrieve_with_quality_boost`, `recall_memory`** ([#970](https://github.com/doobidoo/mcp-memory-service/pull/970), part of [#888](https://github.com/doobidoo/mcp-memory-service/issues/888), @henry201605): Completes the medium-priority Milvus native method set. All three methods push filters to the Milvus server side — `search_memories` applies semantic similarity + tag/type/date filters in one ANN call, `retrieve_with_quality_boost` re-ranks by blending embedding similarity with stored quality scores, and `recall_memory` adds temporal recency weighting. Eliminates N round-trip fallbacks to the base class. 18 new mock-based unit tests in `tests/storage/test_milvus_search_methods.py`.
+
+### Fixed
+
+- **fix(hooks): parse Claude Code transcripts as JSONL with nested message** ([#971](https://github.com/doobidoo/mcp-memory-service/pull/971)): Claude Code transcript format changed from bare JSON objects to JSONL with a `message` wrapper. The auto-capture hook now parses each line as `JSON.parse(line).message ?? line` before extracting tool calls, restoring transcript-based memory capture for current Claude Code versions.
+
+### Dependencies
+
+- **chore(deps): bump actions/github-script from 7 to 9** ([#973](https://github.com/doobidoo/mcp-memory-service/pull/973)): GitHub Actions dependency update.
+- **chore(deps): bump snok/container-retention-policy from 1 to 2** ([#974](https://github.com/doobidoo/mcp-memory-service/pull/974)): GitHub Actions dependency update.
+- **chore(deps): bump actions/setup-python from 4 to 6** ([#975](https://github.com/doobidoo/mcp-memory-service/pull/975)): GitHub Actions dependency update.
+- **chore(deps): bump uv group with 13 updates** ([#976](https://github.com/doobidoo/mcp-memory-service/pull/976)): Dependency maintenance update.
+
 ### Documentation
 
 - **docs: modernize server commands to `memory` CLI** ([#969](https://github.com/doobidoo/mcp-memory-service/pull/969)): Sweep across 23 docs files replacing outdated/dead startup commands with the modern `memory` lifecycle CLI (`launch`, `server`, `restart`). Fixes broken refs (`python scripts/run_http_server.py` — wrong path; `./start_all_servers.sh`, `./stop_all_servers.sh`, `./status_servers.sh`, `python run_server.py` — no longer exist; `python -m src.mcp_memory_service.server` — invalid module path). Modernizes legacy patterns (`uv run memory server` → `memory launch` for HTTP or `memory server` for MCP stdio/Inspector; `python scripts/server/run_http_server.py` → `memory launch`; `./scripts/update_and_restart.sh` → `memory restart`). systemd `ExecStart=` paths, the `claude-hooks/PLUGIN.md` spawn fallback chain, and `python -m mcp_memory_service.server` for MCP stdio are intentionally preserved.
