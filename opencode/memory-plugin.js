@@ -46,11 +46,6 @@ const DEFAULT_CONFIG = {
   },
 }
 
-function pluginOptionOverrides(options = {}) {
-  const { configPath: _configPath, ...rest } = options
-  return rest
-}
-
 function parseInteger(value) {
   if (typeof value !== "string" || !value.trim()) return undefined
   const parsed = Number.parseInt(value, 10)
@@ -129,10 +124,10 @@ function pluginConfigPaths(directory, options = {}) {
   return paths.filter(Boolean)
 }
 
-async function loadConfig(directory, options) {
+async function loadConfig(directory) {
   let config = DEFAULT_CONFIG
 
-  for (const configPath of pluginConfigPaths(directory, options)) {
+  for (const configPath of pluginConfigPaths(directory)) {
     try {
       const raw = await readFile(configPath, "utf8")
       const parsed = JSON.parse(raw)
@@ -144,7 +139,6 @@ async function loadConfig(directory, options) {
   }
 
   config = mergeConfig(config, environmentOverrides())
-  config = mergeConfig(config, pluginOptionOverrides(options))
 
   return config
 }
@@ -574,10 +568,8 @@ async function loadSessionMemories({ config, directory, logInfo, logWarn, health
   }
 }
 
-export default {
-  id: "opencode-memory",
-  server: async ({ client, directory }, options = {}) => {
-  const config = await loadConfig(directory, options)
+export const OpenCodeMemoryPlugin = async ({ directory, client }) => {
+  const config = await loadConfig(directory)
   const sessionState = new Map()
   const healthState = { checked: false }
   const harvestFirstRun = { done: false }
@@ -823,6 +815,5 @@ export default {
         output.context.push(formatted)
       }
     },
-  }
   }
 }
