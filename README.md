@@ -496,7 +496,7 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.64.1** (May 23, 2026)
+## Latest Release: **v10.64.2** (May 23, 2026)
 
 **Patch: Consolidation reliability + OAuth SEP-2207 compliance**
 

@@ -10,19 +10,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.64.2] - 2026-05-23
+
+### Fixed
+
+- **fix(opencode): replace dead chat.message hook with event-based message.part.updated** ([#995](https://github.com/doobidoo/mcp-memory-service/pull/995)): OpenCode's plugin system never triggers `chat.message` — the hook type exists in `@opencode-ai/plugin` but there is no `trigger()` call site in the OpenCode server source. Replaced with `event` hook listening to `message.part.updated` bus events which carry full text content. Also fixes TLS: uses `node:https.Agent` with `rejectUnauthorized: false` because Bun's `fetch()` ignores `NODE_TLS_REJECT_UNAUTHORIZED` at runtime against self-signed certs. Dual export format (V1 `export default {id, server}` + legacy `export const`) for maximum loader compatibility.
+
 ### Added
 
 - **feat(harvest): LLM-based pattern discovery script for locale plugins** ([#992](https://github.com/doobidoo/mcp-memory-service/pull/992), closes [#909](https://github.com/doobidoo/mcp-memory-service/issues/909)): New `scripts/maintenance/discover_harvest_patterns.py` — a one-shot CLI tool that analyzes low-yield harvest sessions (<3 matches from ≥50 messages) and proposes new regex patterns via an optional LLM (Groq or OpenAI-compatible API). Outputs candidate patterns as YAML to `patterns/auto_generated/{locale}.yaml`, matching the existing locale plugin schema. Includes regex validation and plain-text rejection. See `scripts/maintenance/README.md` for usage.
 
 ### Changed
 
-- **feat(opencode): auto-capture + session-end write-back + harvest** — Ported Claude Code hook capabilities into the OpenCode in-process plugin. Adds `chat.message` hook for real-time auto-capture (decision/error/learning pattern detection, #skip/#remember overrides) and `event(session.deleted)` for full-session analysis + summary storage + optional harvest (POST /api/harvest). New config sections: `autoCapture`, `sessionEnd`, `harvest`. Existing session-start retrieval unchanged. (refs claude-hooks/core/session-end.js, auto-capture-hook.js, session-end-harvest.js)
-- **chore(deps): upgrade transitive dependencies** — `uv sync --upgrade` updated attrs, propcache, yarl, starlette, scikit-learn, scipy, zeroconf, and others to latest compatible versions.
-- **chore(docs): archive stale design plans** — Moved 7 design documents from `docs/plans/` to `docs/archive/` (Jan–Apr 2026). No content changes.
+- **feat(opencode): port Claude Code hooks — auto-capture, session-end write-back, harvest** — Ported Claude Code hook capabilities into the OpenCode in-process plugin. Memory retrieval on session start, auto-capture via pattern detection (#skip/#remember overrides), session-end analysis + summary storage, and optional harvest (POST /api/harvest). Hook architecture: `event` (bus events) + `experimental.chat.system.transform` (memory injection) + `experimental.session.compacting` (context preservation). Config sections: `autoCapture`, `sessionEnd`, `harvest`. (Follow-up in [#995](https://github.com/doobidoo/mcp-memory-service/pull/995) replaced `chat.message` with `message.part.updated` bus event.)
 
 ### Maintenance
 
-- **chore(git): install and configure Git LFS** — 29 video assets (PNG screenshots, MP3 audio walkthroughs) and 2 documentation images now tracked via Git LFS. Run `git lfs pull` after cloning to retrieve binary content.
+- **chore(deps): upgrade transitive dependencies** — `uv sync --upgrade` updated attrs, propcache, yarl, starlette, scikit-learn, scipy, zeroconf, and others to latest compatible versions.
+- **chore(docs): archive stale design plans** — Moved 7 design documents from `docs/plans/` to `docs/archive/` (Jan–Apr 2026). No content changes.
+- **chore(git): install and configure Git LFS** — 29 video assets track via Git LFS. Run `git lfs pull` after cloning to retrieve binary content.
 - **chore(git): prune 24 stale local and 5 remote branches** — Cleaned up branches from merged PRs that were squash-merged and not deleted.
 
 ## [10.64.1] - 2026-05-23
