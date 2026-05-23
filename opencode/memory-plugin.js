@@ -57,8 +57,9 @@ const DEFAULT_CONFIG = {
   autoCapture: {
     enabled: true,
     minMessageLength: 100,
+    minSentenceLength: 40,
     maxContentLength: 4000,
-    patterns: ["decision", "error", "learning", "implementation", "important", "code"],
+    patterns: ["decision", "error", "learning", "implementation", "important"],
     tags: ["auto-capture"],
   },
   sessionEnd: {
@@ -127,6 +128,7 @@ function mergeConfig(base, overrides = {}) {
     autoCapture: {
       ...base.autoCapture,
       ...(overrides.autoCapture || {}),
+      patterns: overrides.autoCapture?.patterns ?? base.autoCapture.patterns,
     },
     sessionEnd: {
       ...base.sessionEnd,
@@ -368,6 +370,7 @@ function splitTextSentences(text) {
 function detectValuableContent(text, config) {
   const patterns = config.autoCapture.patterns || DEFAULT_CONFIG.autoCapture.patterns
   const minLength = config.autoCapture.minMessageLength || DEFAULT_CONFIG.autoCapture.minMessageLength
+  const minSentence = config.autoCapture.minSentenceLength || 40
   if (!text || text.length < minLength) return { isValuable: false, reason: "too short", memoryType: null, matchedPattern: null }
 
   const matchers = {
@@ -376,7 +379,6 @@ function detectValuableContent(text, config) {
     learning: /\b(learned|discovered|realized|turns out|insight|understanding|key finding|important to note)\b/i,
     implementation: /\b(implemented|built|created|added|refactored|extracted|migrated|deployed)\b/i,
     important: /\b(important|critical|notable|significant|worth noting|key takeaway)\b/i,
-    code: /```[\s\S]*?```/,
   }
 
   const blocks = splitSentences(text)
@@ -384,18 +386,12 @@ function detectValuableContent(text, config) {
   const types = new Set()
 
   for (const block of blocks) {
-    if (block.type === "code") {
-      if (patterns.includes("code")) {
-        matched.push(block.content)
-        types.add("code")
-      }
-      continue
-    }
+    if (block.type === "code") continue
     const sentences = splitTextSentences(block.content)
     for (const sentence of sentences) {
+      if (sentence.length < minSentence) continue
       const lower = sentence.toLowerCase()
       for (const [name, regex] of Object.entries(matchers)) {
-        if (name === "code") continue
         if (!patterns.includes(name)) continue
         if (regex.test(lower)) {
           matched.push(sentence)
@@ -410,7 +406,7 @@ function detectValuableContent(text, config) {
     return { isValuable: false, reason: "no pattern match", memoryType: null, matchedPattern: null, confidence: 0 }
   }
 
-  const typeOrder = ["decision", "error", "learning", "implementation", "important", "code"]
+  const typeOrder = ["decision", "error", "learning", "implementation", "important"]
   const bestType = typeOrder.find((t) => types.has(t)) || [...types][0]
   return { isValuable: true, memoryType: bestType, matchedPattern: "sentence-split", confidence: 0.8, matchedContent: matched.join("\n") }
 }
