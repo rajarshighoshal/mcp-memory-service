@@ -316,6 +316,37 @@ function extractTextFromParts(parts) {
     .join("\n")
 }
 
+function splitSentences(text) {
+  const blocks = []
+  let lastIndex = 0
+  const codeBlockRe = /```[\s\S]*?```/g
+  let match
+  while ((match = codeBlockRe.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      blocks.push({ type: "text", content: text.slice(lastIndex, match.index) })
+    }
+    blocks.push({ type: "code", content: match[0] })
+    lastIndex = match.index + match[0].length
+  }
+  if (lastIndex < text.length) {
+    blocks.push({ type: "text", content: text.slice(lastIndex) })
+  }
+  return blocks
+}
+
+function splitTextSentences(text) {
+  const result = []
+  const re = /[^.!?\n]+[.!?]+\s*/g
+  let match
+  while ((match = re.exec(text)) !== null) {
+    const s = match[0].trim()
+    if (s) result.push(s)
+  }
+  const remainder = text.replace(re, "").trim()
+  if (remainder) result.push(remainder)
+  return result.length ? result : [text.trim()].filter(Boolean)
+}
+
 function detectValuableContent(text, config) {
   const patterns = config.autoCapture.patterns || DEFAULT_CONFIG.autoCapture.patterns
   const minLength = config.autoCapture.minMessageLength || DEFAULT_CONFIG.autoCapture.minMessageLength
@@ -330,14 +361,40 @@ function detectValuableContent(text, config) {
     code: /```[\s\S]*?```/,
   }
 
-  const lower = text.toLowerCase()
-  for (const [name, regex] of Object.entries(matchers)) {
-    if (!patterns.includes(name)) continue
-    if (regex.test(name === "code" ? text : lower)) {
-      return { isValuable: true, memoryType: name, matchedPattern: name, confidence: 0.8 }
+  const blocks = splitSentences(text)
+  const matched = []
+  const types = new Set()
+
+  for (const block of blocks) {
+    if (block.type === "code") {
+      if (patterns.includes("code")) {
+        matched.push(block.content)
+        types.add("code")
+      }
+      continue
+    }
+    const sentences = splitTextSentences(block.content)
+    for (const sentence of sentences) {
+      const lower = sentence.toLowerCase()
+      for (const [name, regex] of Object.entries(matchers)) {
+        if (name === "code") continue
+        if (!patterns.includes(name)) continue
+        if (regex.test(lower)) {
+          matched.push(sentence)
+          types.add(name)
+          break
+        }
+      }
     }
   }
-  return { isValuable: false, reason: "no pattern match", memoryType: null, matchedPattern: null, confidence: 0 }
+
+  if (matched.length === 0) {
+    return { isValuable: false, reason: "no pattern match", memoryType: null, matchedPattern: null, confidence: 0 }
+  }
+
+  const typeOrder = ["decision", "error", "learning", "implementation", "important", "code"]
+  const bestType = typeOrder.find((t) => types.has(t)) || [...types][0]
+  return { isValuable: true, memoryType: bestType, matchedPattern: "sentence-split", confidence: 0.8, matchedContent: matched.join("\n") }
 }
 
 function analyzeSessionMessages(messages) {
@@ -702,14 +759,14 @@ export default {
       if (overrides.forceSkip) return
 
       // Buffer messages for session-end analysis
-      if (output.message?.role === "user") {
+      if (output.message?.role === "user" || output.message?.role === "assistant") {
         const sid = input.sessionID
         let state = sessionState.get(sid)
         if (!state) {
           state = { projectName: projectNameFromDirectory(directory), memories: [], messages: [] }
           sessionState.set(sid, state)
         }
-        state.messages.push({ role: "user", content: text })
+        state.messages.push({ role: output.message.role, content: text })
       }
 
       // Auto-capture valuable content
@@ -717,7 +774,9 @@ export default {
       const isValuable = overrides.forceRemember || detection.isValuable
 
       if (isValuable) {
-        const projectName = projectNameFromDirectory(directory)
+        const sid = input.sessionID
+        const state = sessionState.get(sid)
+        const projectName = state?.projectName || projectNameFromDirectory(directory)
         const memoryType = overrides.forceRemember ? "note" : detection.memoryType
         const tags = [
           ...config.autoCapture.tags,
@@ -725,7 +784,8 @@ export default {
           projectName.toLowerCase(),
         ]
         const maxLen = config.autoCapture.maxContentLength || 4000
-        const content = text.length > maxLen ? text.slice(0, maxLen - 3) + "..." : text
+        const captureText = detection.matchedContent || text
+        const content = captureText.length > maxLen ? captureText.slice(0, maxLen - 3) + "..." : captureText
 
         try {
           await storeMemoryHttp(config, content, tags, memoryType)
