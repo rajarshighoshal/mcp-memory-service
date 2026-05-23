@@ -595,6 +595,7 @@ async function loadSessionMemories({ config, directory, logInfo, logWarn, health
 const createPlugin = async ({ directory, client }) => {
   const config = await loadConfig(directory)
   const sessionState = new Map()
+  const processedSessions = new Set()
   const healthState = { checked: false }
   const harvestFirstRun = { done: false }
   const appLog = client?.app?.log?.bind?.(client.app) || (() => {})
@@ -802,11 +803,18 @@ const createPlugin = async ({ directory, client }) => {
         refreshSession(sid, sdir)
       }
 
-      if (event.type === "session.deleted") {
-        const sid = event.properties.info.id
-        const sdir = event.properties.info.directory || directory
-        await handleSessionEnd(sid, sdir)
-        sessionState.delete(sid)
+      // session.idle fires DURING the session (bus subscription is alive)
+      // session.deleted fires AFTER scope closes (subscription is gone)
+      // Use idle as primary session-end trigger, deleted as fallback
+      const isSessionEnd = event.type === "session.idle" || event.type === "session.deleted"
+      if (isSessionEnd) {
+        const sid = event.properties.info?.id || event.properties.sessionID
+        if (sid && !processedSessions.has(sid)) {
+          processedSessions.add(sid)
+          const sdir = event.properties.info?.directory || directory
+          await handleSessionEnd(sid, sdir)
+          sessionState.delete(sid)
+        }
       }
 
       if (event.type === "message.part.updated") {
