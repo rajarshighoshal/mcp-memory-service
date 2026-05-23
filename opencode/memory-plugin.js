@@ -114,14 +114,19 @@ function mergeConfig(base, overrides = {}) {
 
 function pluginConfigPaths(directory, options = {}) {
   const configDir = path.join(homedir(), ".config", "opencode")
-  return [
+  const paths = [
     typeof options.configPath === "string" ? options.configPath : "",
     process.env.OPENCODE_MEMORY_PLUGIN_CONFIG || "",
     path.join(configDir, "memory-plugin.json"),
     path.join(configDir, "memory-awareness.json"),
-    path.join(directory, ".opencode", "memory-plugin.json"),
-    path.join(directory, ".opencode", "memory-awareness.json"),
-  ].filter(Boolean)
+  ]
+  if (directory) {
+    paths.push(
+      path.join(directory, ".opencode", "memory-plugin.json"),
+      path.join(directory, ".opencode", "memory-awareness.json"),
+    )
+  }
+  return paths.filter(Boolean)
 }
 
 async function loadConfig(directory, options) {
@@ -161,7 +166,7 @@ function buildHeaders(config, extraHeaders = {}) {
   }
 
   if (config.memoryService.apiKey) {
-    headers.Authorization = `Bearer ${config.memoryService.apiKey}`
+    headers["X-API-Key"] = config.memoryService.apiKey
   }
 
   return headers
@@ -512,12 +517,14 @@ async function loadSessionMemories({ config, directory, logInfo, logWarn, health
   }
 }
 
-export const OpenCodeMemoryPlugin = async ({ client, directory }, options = {}) => {
+export default {
+  id: "opencode-memory",
+  server: async ({ client, directory }, options = {}) => {
   const config = await loadConfig(directory, options)
   const sessionState = new Map()
   const healthState = { checked: false }
   const harvestFirstRun = { done: false }
-  const appLog = client.app.log.bind(client.app)
+  const appLog = client?.app?.log?.bind?.(client.app) || (() => {})
 
   const logInfo = async (message) => {
     if (!config.output.verbose) return
@@ -756,5 +763,6 @@ export const OpenCodeMemoryPlugin = async ({ client, directory }, options = {}) 
         output.context.push(formatted)
       }
     },
+  }
   }
 }
