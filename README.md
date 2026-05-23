@@ -496,18 +496,20 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.64.0** (May 22, 2026)
+## Latest Release: **v10.64.1** (May 23, 2026)
 
-**Minor: Incremental memory consolidation + quality trends fix**
+**Patch: Consolidation reliability + OAuth SEP-2207 compliance**
 
 **What's New:**
-- `feat(consolidation)`: `memory_consolidate(action="run", time_horizon="incremental")` — processes only memories since the last run, DB-atomic lock, 10s timeout, safe to call from session Stop hooks (@filhocf, PR #985, closes #983)
-- `fix(web)`: `GET /api/quality/trends` no longer returns 500 on every backend — two stacked AttributeErrors fixed, now uses correct storage interface (PR #982, reported by @TonbiLX)
-- `docs(research)`: contradiction resolution approaches reference doc added for RFC #732 (@rudi193-cmd / Sean Campbell, PR #984)
+- `fix(consolidation)`: association confidence threshold raised to 0.5 — fewer false-positive graph edges (PR #991)
+- `fix(consolidation)`: `last_run_at` now advances on incremental timeout — prevents re-processing on next run, fixes regression from v10.64.0 (#989, closes #986)
+- `fix(oauth)`: remove `offline_access` from PRM scopes_supported per SEP-2207 (#990)
+- `fix(consolidation)`: tighten temporal proximity window to 7 days for more conservative linking (#988)
 
 ---
 
 **Previous Releases**:
+- **v10.64.0** - feat(consolidation): incremental time_horizon for memory_consolidate (#985, @filhocf) + fix(web): repair /api/quality/trends AttributeError (#982) + docs(research): contradiction resolution approaches (#984)
 - **v10.63.0** - feat(milvus): low-priority overrides completing #888 (search_by_tag_chronological, count_memories_by_tag, is_deleted, purge_deleted) + fix(harvest): Kiro CLI AssistantMessage + 36x parse yield improvement (PRs #978, #979)
 - **v10.62.0** - feat(milvus): native search_memories + retrieve_with_quality_boost + recall_memory (server-side filter pushdown, completes medium-priority #888) + fix(hooks): JSONL transcript parsing (PRs #970, #971)
 - **v10.61.0** - feat(milvus): native update_memory + update_memories_batch (1 round-trip batch upsert) + feat(sse): Last-Event-ID replay on /api/events reconnect (PRs #966, #953)

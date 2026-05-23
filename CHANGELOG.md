@@ -10,6 +10,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.64.1] - 2026-05-23
+
+### Fixed
+
+- **fix(consolidation): raise association confidence threshold to 0.5** ([#991](https://github.com/doobidoo/mcp-memory-service/pull/991)): Increases the minimum confidence score for association discovery from the previous default to 0.5, reducing false-positive graph edges during incremental consolidation runs.
+- **fix(consolidation): advance last_run_at on incremental timeout** ([#989](https://github.com/doobidoo/mcp-memory-service/pull/989), closes [#986](https://github.com/doobidoo/mcp-memory-service/issues/986)): When the 10-second timeout fires during an incremental consolidation, `last_run_at` is now still advanced so the next run picks up where this one left off instead of re-processing the same window. Fixes a user-facing regression introduced in v10.64.0.
+- **fix(oauth): remove offline_access from PRM scopes_supported per SEP-2207** ([#990](https://github.com/doobidoo/mcp-memory-service/pull/990)): Removes `offline_access` from the `scopes_supported` field in OAuth provider metadata (PRM endpoint) to comply with SEP-2207, which mandates that refresh tokens require explicit user authorization rather than being advertised as a default capability.
+- **fix(consolidation): tighten temporal_proximity to 7-day window** ([#988](https://github.com/doobidoo/mcp-memory-service/pull/988)): Reduces the temporal proximity window for association discovery from 14 to 7 days, making the consolidation more conservative about linking temporally-distant memories.
+
+### Maintenance
+
+- **chore: gitignore graphify-out and scheduled_tasks.lock** (commit dcbfc4ee): Adds generated graph output directory and scheduled task lock file to `.gitignore`.
+
 ## [10.64.0] - 2026-05-22
 
 ### Added
