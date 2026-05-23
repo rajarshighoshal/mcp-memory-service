@@ -829,6 +829,7 @@ const createPlugin = async ({ directory, client }) => {
       const formatted = formatMemories(state.projectName, state.memories, config)
       if (formatted) {
         output.system.push(formatted)
+        output.system.push(`<system-reminder>Memory service: ${state.memories.length} context memori${state.memories.length === 1 ? "y" : "es"} loaded for ${state.projectName}</system-reminder>`)
       }
     },
 
