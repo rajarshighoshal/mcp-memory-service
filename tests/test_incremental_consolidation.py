@@ -243,6 +243,34 @@ class TestIncrementalConsolidation:
         consolidator.run_tracker.release("incremental")
 
     @pytest.mark.asyncio
-    async def test_timeout_constant(self):
-        """Verify timeout constant was removed (no asyncio.wait_for wraps the logic)."""
-        pass
+    async def test_timeout_advances_last_run_at(self, monkeypatch, tmp_path):
+        """Verify that timeout handler calls record_run to advance last_run_at."""
+        import mcp_memory_service.server.handlers.consolidation as handler_module
+        
+        # Set very short timeout to force timeout
+        monkeypatch.setattr(handler_module, "INCREMENTAL_TIMEOUT_SECONDS", 0.01)
+        
+        # Create a mock server with slow consolidator
+        server = AsyncMock()
+        
+        # Mock the consolidator to be slow (will timeout)
+        async def slow_consolidate(time_horizon):
+            await asyncio.sleep(1)  # Sleep longer than timeout
+            return MagicMock()
+        
+        server.consolidator.consolidate = slow_consolidate
+        server.consolidator.run_tracker = AsyncMock()
+        server.consolidator.run_tracker.record_run = AsyncMock()
+        
+        # Call the handler
+        result = await handler_module.handle_consolidate_memories(
+            server,
+            {"time_horizon": "incremental"}
+        )
+        
+        # Verify record_run was called with 0 memories
+        server.consolidator.run_tracker.record_run.assert_awaited_once_with("incremental", 0)
+        
+        # Verify the response indicates timeout
+        assert len(result) == 1
+        assert "timed out" in result[0].text.lower()

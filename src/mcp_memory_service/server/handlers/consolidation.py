@@ -19,6 +19,7 @@ Memory consolidation, scheduler control, status monitoring, and recommendations.
 Extracted from server_impl.py Phase 2.2 refactoring.
 """
 
+import asyncio
 import logging
 import traceback
 from typing import List
@@ -27,6 +28,9 @@ from mcp import types
 from ...config import CONSOLIDATION_ENABLED
 
 logger = logging.getLogger(__name__)
+
+# Timeout for incremental consolidation (seconds)
+INCREMENTAL_TIMEOUT_SECONDS = 10
 
 
 async def handle_consolidate_memories(server, arguments: dict) -> List[types.TextContent]:
@@ -46,15 +50,15 @@ async def handle_consolidate_memories(server, arguments: dict) -> List[types.Tex
 
         # Run consolidation (with timeout for incremental)
         if time_horizon == "incremental":
-            import asyncio
-            from ..consolidation.consolidator import INCREMENTAL_TIMEOUT_SECONDS
             try:
                 report = await asyncio.wait_for(
                     server.consolidator.consolidate(time_horizon),
                     timeout=INCREMENTAL_TIMEOUT_SECONDS,
                 )
             except asyncio.TimeoutError:
-                return [types.TextContent(type="text", text="Incremental consolidation timed out (>10s). Partial progress saved.")]
+                if server.consolidator.run_tracker:
+                    await server.consolidator.run_tracker.record_run("incremental", 0)
+                return [types.TextContent(type="text", text=f"Incremental consolidation timed out (>{INCREMENTAL_TIMEOUT_SECONDS}s). Partial progress saved.")]
         else:
             report = await server.consolidator.consolidate(time_horizon)
 
