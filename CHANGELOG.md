@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **feat(harvest): LLM-based pattern discovery script for locale plugins** ([#992](https://github.com/doobidoo/mcp-memory-service/pull/992), closes [#909](https://github.com/doobidoo/mcp-memory-service/issues/909)): New `scripts/maintenance/discover_harvest_patterns.py` — a one-shot CLI tool that analyzes low-yield harvest sessions (<3 matches from ≥50 messages) and proposes new regex patterns via an optional LLM (Groq or OpenAI-compatible API). Outputs candidate patterns as YAML to `patterns/auto_generated/{locale}.yaml`, matching the existing locale plugin schema. Includes regex validation and plain-text rejection. See `scripts/maintenance/README.md` for usage.
+
 ## [10.64.1] - 2026-05-23
 
 ### Fixed
