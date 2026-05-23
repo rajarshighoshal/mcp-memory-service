@@ -498,17 +498,17 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 
 ## Latest Release: **v10.64.2** (May 23, 2026)
 
-**Patch: Consolidation reliability + OAuth SEP-2207 compliance**
+**Patch: OpenCode plugin hook fix + TLS support**
 
 **What's New:**
-- `fix(consolidation)`: association confidence threshold raised to 0.5 — fewer false-positive graph edges (PR #991)
-- `fix(consolidation)`: `last_run_at` now advances on incremental timeout — prevents re-processing on next run, fixes regression from v10.64.0 (#989, closes #986)
-- `fix(oauth)`: remove `offline_access` from PRM scopes_supported per SEP-2207 (#990)
-- `fix(consolidation)`: tighten temporal proximity window to 7 days for more conservative linking (#988)
+- `fix(opencode)`: replaced dead `chat.message` hook with event-based `message.part.updated` bus events (PR #995)
+- `fix(opencode)`: dual export format (V1 + legacy) for maximum loader compatibility
+- `fix(opencode)`: `node:https.Agent` with `rejectUnauthorized: false` for self-signed cert support in Bun/Node
 
 ---
 
 **Previous Releases**:
+- **v10.64.1** - fix(consolidation): association confidence threshold raised to 0.5 (PR #991) + fix(consolidation): `last_run_at` advance on timeout (#989, closes #986) + fix(oauth): remove `offline_access` per SEP-2207 (#990) + fix(consolidation): temporal proximity 7-day window (#988)
 - **v10.64.0** - feat(consolidation): incremental time_horizon for memory_consolidate (#985, @filhocf) + fix(web): repair /api/quality/trends AttributeError (#982) + docs(research): contradiction resolution approaches (#984)
 - **v10.63.0** - feat(milvus): low-priority overrides completing #888 (search_by_tag_chronological, count_memories_by_tag, is_deleted, purge_deleted) + fix(harvest): Kiro CLI AssistantMessage + 36x parse yield improvement (PRs #978, #979)
 - **v10.62.0** - feat(milvus): native search_memories + retrieve_with_quality_boost + recall_memory (server-side filter pushdown, completes medium-priority #888) + fix(hooks): JSONL transcript parsing (PRs #970, #971)
