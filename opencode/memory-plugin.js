@@ -823,13 +823,20 @@ const createPlugin = async ({ directory, client }) => {
     "experimental.chat.system.transform": async (input, output) => {
       if (!input.sessionID) return
 
-      const state = await waitForSession(input.sessionID, directory)
+      // session.created fires before bus subscription starts — refreshSession
+      // might never have been called. Load memories on first system prompt request.
+      let state = sessionState.get(input.sessionID)
+      if (!state) {
+        refreshSession(input.sessionID, directory)
+        state = sessionState.get(input.sessionID)
+      }
+      state = await waitForSession(input.sessionID, directory)
       if (!state?.memories?.length) return
 
       const formatted = formatMemories(state.projectName, state.memories, config)
       if (formatted) {
+        output.system.push(`\n--- Memory Service: ${state.memories.length} context memori${state.memories.length === 1 ? "y" : "es"} loaded for ${state.projectName} ---`)
         output.system.push(formatted)
-        output.system.push(`<system-reminder>Memory service: ${state.memories.length} context memori${state.memories.length === 1 ? "y" : "es"} loaded for ${state.projectName}</system-reminder>`)
       }
     },
 
