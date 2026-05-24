@@ -594,16 +594,14 @@ const createPlugin = async ({ directory, client }) => {
   const processedSessions = new Set()
   const healthState = { checked: false }
   const harvestFirstRun = { done: false }
-  const appLog = client?.app?.log?.bind?.(client.app) || (() => {})
-
   const logInfo = async (message) => {
     if (!config.output.verbose) return
-    await appLog({ service: "opencode-memory", level: "info", message }).catch(() => {})
+    try { await client?.app?.log?.({ service: "opencode-memory", level: "info", message }) } catch (_) {}
   }
 
   const logWarn = async (message) => {
     if (!config.output.verbose) return
-    await appLog({ service: "opencode-memory", level: "warn", message }).catch(() => {})
+    try { await client?.app?.log?.({ service: "opencode-memory", level: "warn", message }) } catch (_) {}
   }
 
   const refreshSession = (sessionID, sessionDirectory) => {
@@ -835,7 +833,7 @@ const createPlugin = async ({ directory, client }) => {
 
       const formatted = formatMemories(state.projectName, state.memories, config)
       if (formatted) {
-        output.system.push(`\n--- Memory Service: ${state.memories.length} context memori${state.memories.length === 1 ? "y" : "es"} loaded for ${state.projectName} ---`)
+        await logInfo(`Memory: ${state.memories.length} loaded for ${state.projectName}`)
         output.system.push(formatted)
       }
     },
