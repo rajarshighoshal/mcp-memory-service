@@ -509,18 +509,23 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.64.2** (May 23, 2026)
+## Latest Release: **v10.65.0** (May 24, 2026)
 
-**Patch: OpenCode plugin hook fix + TLS support**
+**Minor: OpenCode `/memory` slash commands, TUI sidebar widget, status bridge**
 
 **What's New:**
-- `fix(opencode)`: replaced dead `chat.message` hook with event-based `message.part.updated` bus events (PR #995)
-- `fix(opencode)`: dual export format (V1 + legacy) for maximum loader compatibility
-- `fix(opencode)`: `node:https.Agent` with `rejectUnauthorized: false` for self-signed cert support in Bun/Node
+- `feat(opencode)`: `/memory`, `/memory search <query>`, `/memory health` slash commands in OpenCode (PR #997)
+- `feat(opencode)`: Working Solid TUI sidebar widget (`memory-status-tui.tsx`) compiled via `babel-preset-solid`
+- `feat(opencode)`: Per-instance status snapshot at `~/.config/opencode/.memory-status.json`
+- `fix(opencode)`: TUI toasts now fire correctly — `variant` field was missing, causing silent 400s
+- `fix(opencode)`: Session-summary upsert on `session.idle` eliminates duplicate summaries in vector DB
+- `fix(opencode)`: `/memory health` now hits `/api/health/detailed` (hardened endpoint post-GHSA-73hc-m4hx-79pj)
+- `fix(opencode)`: Multi-project status corruption fix (per Gemini code review)
 
 ---
 
 **Previous Releases**:
+- **v10.64.2** - fix(opencode): replace dead chat.message hook with event-based message.part.updated + add export default {id,server} for V1 plugin compat + use node:https Agent with rejectUnauthorized=false for self-signed cert support (PR #995)
 - **v10.64.1** - fix(consolidation): association confidence threshold raised to 0.5 (PR #991) + fix(consolidation): `last_run_at` advance on timeout (#989, closes #986) + fix(oauth): remove `offline_access` per SEP-2207 (#990) + fix(consolidation): temporal proximity 7-day window (#988)
 - **v10.64.0** - feat(consolidation): incremental time_horizon for memory_consolidate (#985, @filhocf) + fix(web): repair /api/quality/trends AttributeError (#982) + docs(research): contradiction resolution approaches (#984)
 - **v10.63.0** - feat(milvus): low-priority overrides completing #888 (search_by_tag_chronological, count_memories_by_tag, is_deleted, purge_deleted) + fix(harvest): Kiro CLI AssistantMessage + 36x parse yield improvement (PRs #978, #979)
