@@ -1,7 +1,9 @@
-import { readFile } from "node:fs/promises"
+import { mkdir, readFile, writeFile } from "node:fs/promises"
 import { homedir } from "node:os"
 import https from "node:https"
 import path from "node:path"
+
+const STATUS_FILE = path.join(homedir(), ".config", "opencode", ".memory-status.json")
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = process.env.NODE_TLS_REJECT_UNAUTHORIZED || "0"
 
@@ -535,7 +537,13 @@ async function searchMemories(config, query, tags, limit) {
 }
 
 async function getHealth(config) {
-  return requestJson(config, "/api/health")
+  // /api/health was hardened (GHSA-73hc-m4hx-79pj) and returns only {status}.
+  // Storage backend info now lives on /api/health/detailed (requires API key).
+  try {
+    return await requestJson(config, "/api/health/detailed")
+  } catch (_) {
+    return await requestJson(config, "/api/health")
+  }
 }
 
 function tagsForProject(projectName, config) {
@@ -591,9 +599,33 @@ async function loadSessionMemories({ config, directory, logInfo, logWarn, health
 const createPlugin = async ({ directory, client }) => {
   const config = await loadConfig(directory)
   const sessionState = new Map()
-  const processedSessions = new Set()
   const healthState = { checked: false }
   const harvestFirstRun = { done: false }
+
+  // Per-instance status snapshot. Each plugin instance owns its own picture
+  // of memory activity and writes the whole object to disk on update so that
+  // a sibling plugin instance from a different project cannot leak fields
+  // into our snapshot via partial merges. The file therefore reflects the
+  // most recently active plugin instance — fine for the single-user case the
+  // TUI sidebar widget targets.
+  const status = {
+    projectName: projectNameFromDirectory(directory),
+    loadedCount: 0,
+    capturedCount: 0,
+    lastAction: "",
+    lastSummaryAt: null,
+    updatedAt: null,
+  }
+
+  const writeStatus = async (patch) => {
+    Object.assign(status, patch)
+    status.updatedAt = new Date().toISOString()
+    try {
+      await mkdir(path.dirname(STATUS_FILE), { recursive: true })
+      await writeFile(STATUS_FILE, JSON.stringify(status, null, 2))
+    } catch (_) {}
+  }
+
   const logInfo = async (message) => {
     if (!config.output.verbose) return
     try { await client?.app?.log?.({ service: "opencode-memory", level: "info", message }) } catch (_) {}
@@ -670,7 +702,11 @@ const createPlugin = async ({ directory, client }) => {
 
   const handleSessionEnd = async (sessionID, sessionDirectory) => {
     try {
-      const state = sessionState.get(sessionID) || { projectName: projectNameFromDirectory(sessionDirectory), messages: [] }
+      let state = sessionState.get(sessionID)
+      if (!state) {
+        state = { projectName: projectNameFromDirectory(sessionDirectory), messages: [], memories: [] }
+        sessionState.set(sessionID, state)
+      }
 
       // --- Session-End Consolidation ---
       if (config.sessionEnd.enabled && state.messages?.length > 0) {
@@ -694,8 +730,16 @@ const createPlugin = async ({ directory, client }) => {
               analysis.nextSteps.length ? `\n**Next Steps:**\n${analysis.nextSteps.map((d) => `- ${d}`).join("\n")}` : "",
             ].filter(Boolean).join("\n")
 
+            // Overwrite the previous summary of the same active session to avoid DB pollution
+            if (state.lastSummaryHash) {
+              try {
+                await requestJson(config, `/api/memories/${state.lastSummaryHash}`, { method: "DELETE" })
+                state.lastSummaryHash = null
+              } catch (_) {}
+            }
+
             try {
-              await storeMemoryHttp(config, consolidation, tags, "session-summary", {
+              const res = await storeMemoryHttp(config, consolidation, tags, "session-summary", {
                 session_analysis: {
                   topics: analysis.topics,
                   decisions_count: analysis.decisions.length,
@@ -707,7 +751,30 @@ const createPlugin = async ({ directory, client }) => {
                 },
                 session_id: sessionID,
               })
+              
+              if (res?.success && res?.content_hash) {
+                state.lastSummaryHash = res.content_hash
+              }
+
               await logInfo(`Session summary stored for ${state.projectName}`)
+              await writeStatus({
+                projectName: state.projectName,
+                lastAction: `Session summary stored`,
+                lastSummaryAt: new Date().toISOString(),
+              })
+              if (!state._sessionToastShown) {
+                state._sessionToastShown = true
+                try {
+                  await client?.tui?.showToast?.({
+                    body: {
+                      title: "Memory Service",
+                      message: `Storing session summary for ${state.projectName}.`,
+                      variant: "success",
+                    },
+                    query: { directory },
+                  })
+                } catch (_) {}
+              }
             } catch (error) {
               await logWarn(`Session summary store failed: ${error.message}`)
             }
@@ -783,6 +850,22 @@ const createPlugin = async ({ directory, client }) => {
       try {
         await storeMemoryHttp(config, content, tags, memoryType)
         await logInfo(`Auto-captured ${memoryType}`)
+        state._captureCount = (state._captureCount || 0) + 1
+        await writeStatus({
+          projectName: state.projectName,
+          capturedCount: state._captureCount,
+          lastAction: `Captured ${memoryType} (#${state._captureCount})`,
+        })
+        try {
+          await client?.tui?.showToast?.({
+            body: {
+              title: "Memory Service",
+              message: `Captured ${memoryType} memory for ${state.projectName}.`,
+              variant: "info",
+            },
+            query: { directory },
+          })
+        } catch (_) {}
       } catch (error) {
         await logWarn(`Auto-capture failed: ${error.message}`)
       }
@@ -797,14 +880,22 @@ const createPlugin = async ({ directory, client }) => {
         refreshSession(sid, sdir)
       }
 
-      // session.idle fires DURING the session (bus subscription is alive)
-      // session.deleted fires AFTER scope closes (subscription is gone)
-      // Use idle as primary session-end trigger, deleted as fallback
-      const isSessionEnd = event.type === "session.idle" || event.type === "session.deleted"
-      if (isSessionEnd) {
+      // session.idle fires DURING the session (bus subscription is alive).
+      // We incrementally update the summary on idle so that the most
+      // up-to-date summary is always preserved even if the session exits suddenly.
+      if (event.type === "session.idle") {
         const sid = event.properties.info?.id || event.properties.sessionID
-        if (sid && !processedSessions.has(sid)) {
-          processedSessions.add(sid)
+        if (sid) {
+          const sdir = event.properties.info?.directory || directory
+          await handleSessionEnd(sid, sdir)
+        }
+      }
+
+      // session.deleted fires AFTER scope closes (subscription is gone).
+      // If we do receive it, perform final cleanup and delete sessionState.
+      if (event.type === "session.deleted") {
+        const sid = event.properties.info?.id || event.properties.sessionID
+        if (sid) {
           const sdir = event.properties.info?.directory || directory
           await handleSessionEnd(sid, sdir)
           sessionState.delete(sid)
@@ -816,7 +907,71 @@ const createPlugin = async ({ directory, client }) => {
       }
     },
 
+    "command.execute.before": async (input, output) => {
+      if (input.command !== "memory") return
 
+      const projectName = projectNameFromDirectory(directory)
+      const args = (input.arguments || "").trim()
+      const tokens = args ? args.split(/\s+/) : []
+      const sub = (tokens[0] || "status").toLowerCase()
+
+      let block = ""
+      try {
+        if (sub === "search" && tokens.length > 1) {
+          const query = tokens.slice(1).join(" ")
+          const tags = tagsForProject(projectName, config)
+          const results = await searchMemories(config, query, tags, 5)
+          if (!results.length) {
+            block = `# Memory Search — "${query}"\n\nNo matches.`
+          } else {
+            const lines = [`# Memory Search — "${query}"`, ""]
+            for (const m of results) {
+              const ts = formatTimestamp(m)
+              const prefix = ts ? `- [${ts}] ` : "- "
+              lines.push(prefix + truncateText(m.content.replace(/\s+/g, " ").trim(), 240))
+            }
+            block = lines.join("\n")
+          }
+        } else if (sub === "health") {
+          const h = await getHealth(config).catch((e) => ({ error: e.message }))
+          const backend = h?.storage?.backend || h?.storage_backend || h?.backend || "unknown"
+          const healthStatus = h?.error ? `error: ${h.error}` : (h?.status || "healthy")
+          const memCount = h?.statistics?.total_memories ?? h?.total_memories
+          const lines = [`# Memory Service Health`, ""]
+          lines.push(`- Backend: ${backend}`)
+          lines.push(`- Status: ${healthStatus}`)
+          if (memCount !== undefined) lines.push(`- Total memories: ${memCount}`)
+          lines.push(`- Endpoint: ${config.memoryService.endpoint}`)
+          block = lines.join("\n")
+        } else {
+          // Read from this plugin instance's in-memory snapshot — not from
+          // STATUS_FILE — so the displayed status is always the current
+          // project's, even when another plugin instance (different project)
+          // is also running and overwriting the shared file.
+          const sessionMemories = input.sessionID
+            ? sessionState.get(input.sessionID)?.memories?.length
+            : undefined
+          const lines = [`# Memory Status — ${projectName}`, ""]
+          lines.push(`- Project: ${status.projectName || projectName}`)
+          lines.push(`- Loaded this session: ${sessionMemories ?? status.loadedCount ?? 0}`)
+          lines.push(`- Auto-captured: ${status.capturedCount ?? 0}`)
+          if (status.lastAction) lines.push(`- Last action: ${status.lastAction}`)
+          if (status.lastSummaryAt) lines.push(`- Last summary: ${status.lastSummaryAt}`)
+          if (status.updatedAt) lines.push(`- Updated: ${status.updatedAt}`)
+          lines.push("")
+          lines.push("Usage: `/memory`, `/memory search <query>`, `/memory health`")
+          block = lines.join("\n")
+        }
+      } catch (error) {
+        block = `# Memory command failed\n\n${error.message}`
+      }
+
+      output.parts.length = 0
+      output.parts.push({
+        type: "text",
+        text: "Reply with the following block verbatim. No commentary, no questions.\n\n" + block,
+      })
+    },
 
     "experimental.chat.system.transform": async (input, output) => {
       if (!input.sessionID) return
@@ -834,6 +989,24 @@ const createPlugin = async ({ directory, client }) => {
       const formatted = formatMemories(state.projectName, state.memories, config)
       if (formatted) {
         await logInfo(`Memory: ${state.memories.length} loaded for ${state.projectName}`)
+        await writeStatus({
+          projectName: state.projectName,
+          loadedCount: state.memories.length,
+          lastAction: `Loaded ${state.memories.length} memories`,
+        })
+        if (!state._loadToastShown) {
+          state._loadToastShown = true
+          try {
+            await client?.tui?.showToast?.({
+              body: {
+                title: "Memory Service",
+                message: `Loaded ${state.memories.length} memories for ${state.projectName}.`,
+                variant: "info",
+              },
+              query: { directory },
+            })
+          } catch (_) {}
+        }
         output.system.push(formatted)
       }
     },
