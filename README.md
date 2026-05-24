@@ -509,22 +509,18 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.65.0** (May 24, 2026)
+## Latest Release: **v10.65.1** (May 24, 2026)
 
-**Minor: OpenCode `/memory` slash commands, TUI sidebar widget, status bridge**
+**Patch: Guard learning_session against unresolved CLI placeholders, privacy-safe audit log default**
 
 **What's New:**
-- `feat(opencode)`: `/memory`, `/memory search <query>`, `/memory health` slash commands in OpenCode (PR #997)
-- `feat(opencode)`: Working Solid TUI sidebar widget (`memory-status-tui.tsx`) compiled via `babel-preset-solid`
-- `feat(opencode)`: Per-instance status snapshot at `~/.config/opencode/.memory-status.json`
-- `fix(opencode)`: TUI toasts now fire correctly — `variant` field was missing, causing silent 400s
-- `fix(opencode)`: Session-summary upsert on `session.idle` eliminates duplicate summaries in vector DB
-- `fix(opencode)`: `/memory health` now hits `/api/health/detailed` (hardened endpoint post-GHSA-73hc-m4hx-79pj)
-- `fix(opencode)`: Multi-project status corruption fix (per Gemini code review)
+- `fix(prompts)`: Detect unresolved CLI `$N` placeholders in `_prompt_learning_session` — prevents storing template artifacts as memories (PR #1000, closes #998)
+- `docs`: Audit-log example plugin defaults to `MCP_PLUGIN_AUDIT_LOG_PRIVACY_MODE=safe`; raw mode and optional HMAC pseudonymisation available (PR #999)
 
 ---
 
 **Previous Releases**:
+- **v10.65.0** - feat(opencode): `/memory` slash commands, TUI toasts, status bridge, working Solid TUI sidebar widget, session-summary dedup fix (PR #997)
 - **v10.64.2** - fix(opencode): replace dead chat.message hook with event-based message.part.updated + add export default {id,server} for V1 plugin compat + use node:https Agent with rejectUnauthorized=false for self-signed cert support (PR #995)
 - **v10.64.1** - fix(consolidation): association confidence threshold raised to 0.5 (PR #991) + fix(consolidation): `last_run_at` advance on timeout (#989, closes #986) + fix(oauth): remove `offline_access` per SEP-2207 (#990) + fix(consolidation): temporal proximity 7-day window (#988)
 - **v10.64.0** - feat(consolidation): incremental time_horizon for memory_consolidate (#985, @filhocf) + fix(web): repair /api/quality/trends AttributeError (#982) + docs(research): contradiction resolution approaches (#984)

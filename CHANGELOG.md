@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.65.1] - 2026-05-24
+
+### Fixed
+
+- **fix(prompts): guard `learning_session` against unresolved CLI `$N` placeholders** ([#1000](https://github.com/doobidoo/mcp-memory-service/pull/1000)): Adds regex-based detection of unresolved CLI positional placeholders (`$1`, `$2`, etc.) in `_prompt_learning_session` to prevent storing them as real memories when the prompt template is invoked without required arguments. Closes [#998](https://github.com/doobidoo/mcp-memory-service/issues/998).
+
+### Changed
+
+- **docs: make audit log plugin privacy-safe by default** ([#999](https://github.com/doobidoo/mcp-memory-service/pull/999)): Example audit-log plugin now defaults to `MCP_PLUGIN_AUDIT_LOG_PRIVACY_MODE=safe`, which strips or hashes sensitive fields. Raw mode (`MCP_PLUGIN_AUDIT_LOG_PRIVACY_MODE=raw`) is available for debugging. Optional HMAC key (`MCP_PLUGIN_AUDIT_LOG_HMAC_KEY`) enables deterministic pseudonymisation of user identifiers.
+
 ## [10.65.0] - 2026-05-24
 
 ### Added
