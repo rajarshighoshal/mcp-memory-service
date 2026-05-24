@@ -211,14 +211,9 @@ The build script writes the compiled file to `opencode/memory-status-tui.js` and
 }
 ```
 
-After restart, the sidebar shows a new section above Context:
+After restart, the sidebar shows a new "Memory" section above Context, and `/memory` renders a status block in chat:
 
-```
-Memory
-loaded 6 · captured 0
-mcp-memory-service
-Loaded 6 memories
-```
+![Memory sidebar widget and /memory slash command in OpenCode](screenshots/sidebar.png)
 
 **Key takeaway for plugin authors:** OpenCode splits config across two files. Server plugins (`{id, server}` exports) go in `opencode.json["plugin"]`. TUI plugins (`{id, tui}` exports) go in `tui.json["plugin"]`. Putting a TUI plugin in `opencode.json` triggers the loader error `must default export an object with server()`.
 
