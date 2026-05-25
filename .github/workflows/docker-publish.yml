@@ -178,7 +178,11 @@ jobs:
       with:
         context: .
         file: ./tools/docker/Dockerfile.quality-cpu
-        platforms: linux/amd64,linux/arm64
+        # amd64 only: the builder stage installs CPU PyTorch (~750 MB) and
+        # converts models to ONNX. Running this under QEMU arm64 emulation on
+        # GitHub-hosted runners consistently exceeds the 6-hour job limit
+        # (issue #1002). arm64 users should use :slim or :latest instead.
+        platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta-quality-cpu.outputs.tags }}
         labels: ${{ steps.meta-quality-cpu.outputs.labels }}
