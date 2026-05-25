@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### CI
+
+- **chore(ci): pin all GitHub Actions to full SHA hashes** ([#1005](https://github.com/doobidoo/mcp-memory-service/pull/1005)): Supply chain hardening against TeamPCP-style tag-mutation attacks. All 20 workflow files now use full 40-character commit SHA hashes instead of floating version tags (`@v1`, `@v4`, `@v6`, `@v7` etc.) — 109 `uses:` entries across 18 unique action refs. Highest-risk refs: `gaurav-nelson/github-action-markdown-link-check` (community maintainer), `snok/container-retention-policy` (community), and `anthropics/claude-code-action` (runs with `CLAUDE_CODE_OAUTH_TOKEN`). Human-readable `# vtag` comments preserved. `peter-evans/create-pull-request` was already SHA-pinned.
+
 ## [10.65.3] - 2026-05-25
 
 ### Security
