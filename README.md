@@ -509,17 +509,18 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.65.1** (May 24, 2026)
+## Latest Release: **v10.65.3** (May 25, 2026)
 
-**Patch: Guard learning_session against unresolved CLI placeholders, privacy-safe audit log default**
+**Patch: Security fix (GHSA-2r68-g678-7qr3 CVSS 8.1) — enforce write scope on MCP tools/call + CI amd64-only Docker build**
 
 **What's New:**
-- `fix(prompts)`: Detect unresolved CLI `$N` placeholders in `_prompt_learning_session` — prevents storing template artifacts as memories (PR #1000, closes #998)
-- `docs`: Audit-log example plugin defaults to `MCP_PLUGIN_AUDIT_LOG_PRIVACY_MODE=safe`; raw mode and optional HMAC pseudonymisation available (PR #999)
+- `fix(security)`: OAuth read-only clients could call mutating MCP tools via `/mcp/tools/call`. Fixed with `_WRITE_TOOLS` scope check; returns JSON-RPC -32003 + HTTP 403. 4 regression tests added. ([GHSA-2r68-g678-7qr3](https://github.com/doobidoo/mcp-memory-service/security/advisories/GHSA-2r68-g678-7qr3), PR #1004)
+- `ci`: Restrict `quality-cpu` Docker build to `linux/amd64` only — eliminates 6h QEMU timeout on every release since v10.64.0. arm64 users: use `:slim` or `:latest` (PR #1003, closes #1002)
 
 ---
 
 **Previous Releases**:
+- **v10.65.1** - fix(prompts): guard `learning_session` against unresolved CLI `$N` placeholders (PR #1000) + docs: privacy-safe audit log default (PR #999)
 - **v10.65.0** - feat(opencode): `/memory` slash commands, TUI toasts, status bridge, working Solid TUI sidebar widget, session-summary dedup fix (PR #997)
 - **v10.64.2** - fix(opencode): replace dead chat.message hook with event-based message.part.updated + add export default {id,server} for V1 plugin compat + use node:https Agent with rejectUnauthorized=false for self-signed cert support (PR #995)
 - **v10.64.1** - fix(consolidation): association confidence threshold raised to 0.5 (PR #991) + fix(consolidation): `last_run_at` advance on timeout (#989, closes #986) + fix(oauth): remove `offline_access` per SEP-2207 (#990) + fix(consolidation): temporal proximity 7-day window (#988)

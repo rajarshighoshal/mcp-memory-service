@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.65.3] - 2026-05-25
+
+### Security
+
+- **fix(security): enforce write scope on MCP tools/call — [GHSA-2r68-g678-7qr3](https://github.com/doobidoo/mcp-memory-service/security/advisories/GHSA-2r68-g678-7qr3)** ([#1004](https://github.com/doobidoo/mcp-memory-service/pull/1004)): OAuth read-only clients could invoke mutating MCP tools (`store_memory`, `delete_memory`, and related write operations) via the `/mcp/tools/call` endpoint despite holding only a read-scope token. Fixed by adding a `_WRITE_TOOLS` set and checking OAuth scope before dispatch; unauthorized calls now return JSON-RPC error `-32003` and HTTP 403. CVSS 8.1, CWE-862 (Missing Authorization). 4 regression tests added.
+
+### CI
+
+- **ci: restrict quality-cpu Docker build to linux/amd64 only** ([#1003](https://github.com/doobidoo/mcp-memory-service/pull/1003), closes [#1002](https://github.com/doobidoo/mcp-memory-service/issues/1002)): The `quality-cpu` Docker image build job was timing out at the 6-hour GitHub Actions limit on every release since v10.64.0 due to QEMU-emulated arm64 cross-compilation. Platforms restricted to `linux/amd64`; arm64 users should use the `:slim` or `:latest` images which are multi-arch.
+
 ## [10.65.1] - 2026-05-24
 
 ### Fixed
