@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- **docs(contributing): tighten contributor guidelines + add agent disclosure policy**: Added `## Security-Sensitive Changes` section (protected paths, required scope-enforcement checklist for new MCP tools) and `## Autonomous Agents & AI-Generated PRs` section (mandatory disclosure, 7-day clarification window). PR template extended with `## Security` and `## Agent Disclosure` sections. CODEOWNERS updated to require `@doobidoo` approval on `web/api/mcp.py`, `web/oauth/`, and `.github/workflows/`.
+
 ### Fixed
 
 - **fix(opencode): don't use https for http access**: Fix connection failure while using local `http` endpoint with the opencode plugin.
