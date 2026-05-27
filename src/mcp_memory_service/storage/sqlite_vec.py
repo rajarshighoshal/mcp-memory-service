@@ -1871,7 +1871,7 @@ SOLUTIONS:
 
             results = await self._execute_with_retry(search_fts)
 
-            logger.debug(f"BM25 search found {len(results)} results for query: {query_clean}")
+            logger.debug(f"BM25 search found {len(results)} results for query: {_sanitize_log_value(query_clean)}")
             return results
 
         except Exception as e:
