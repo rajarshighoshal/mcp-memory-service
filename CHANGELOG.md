@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
+- **fix(storage): align `HttpClientStorage.retrieve` signature with `BaseStorage`** ([CodeQL #428](https://github.com/doobidoo/mcp-memory-service/security/code-scanning/428)): `http_client.py` override was missing `min_confidence`, `start_time`, and `end_time` parameters present in the abstract base. All three are now forwarded to the HTTP API payload when set (`py/inheritance/signature-mismatch`).
+
 - **fix(opencode): don't use https for http access**: Fix connection failure while using local `http` endpoint with the opencode plugin.
 
 ### CI
