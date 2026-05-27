@@ -10,9 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-### Fixed
+### Added
 
-- **fix(web): `recall_memory` HTTP path now parses time expressions** ([PR #1029](https://github.com/doobidoo/mcp-memory-service/pull/1029), @filhocf): The `/mcp` HTTP endpoint's `recall_memory` handler now extracts time expressions from the query string (e.g. "last week", "yesterday") using the same `extract_time_expression`/`parse_time_expression` pipeline as the stdio handler. Backend-optimized `recall()` is used when available; falls back to `search_memories` for backends that don't implement it.
+- **fix(mcp): expose full v10 tool surface over HTTP** ([PR #1017](https://github.com/doobidoo/mcp-memory-service/pull/1017), @laanwj): `/mcp tools/list` previously advertised only 7 pre-v10 names (forked from stdio around v4, never resynced through the v10 consolidation). Now matches stdio's full v10 surface: `memory_graph`, `memory_quality`, `memory_harvest`, `memory_conflicts`, `memory_resolve`, `memory_consolidate`, `memory_ingest`, `memory_update`, `memory_stats`, `memory_store_session`, `mistake_note_add`, `mistake_note_search` are now reachable over HTTP. Pre-v10 names remain callable via the deprecation compat layer but are no longer advertised. `serverInfo.version` now reports the running package version instead of the stale `4.1.1` literal. Write-scope enforcement derived dynamically from `readOnlyHint` annotations — new tools automatically get correct scope gating without manual list maintenance. `memory_harvest` and `memory_ingest` blocked over HTTP (filesystem-path tools, stdio-only for security). Also subsumes the per-tool `recall_memory` time-expression fix from #1029 — HTTP transport now inherits stdio behavior by routing through the shared dispatcher.
 
 ## [10.66.1] - 2026-05-27
 
