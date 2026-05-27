@@ -2670,7 +2670,7 @@ Examples:
             # Check env var override first (supports any CLI)
             env_override = os.environ.get("MCP_HARVEST_SESSION_DIR")
             if env_override:
-                project_path = _Path(env_override)
+                project_path = _Path(env_override).expanduser()
             else:
                 # Default: Claude Code project dir from cwd
                 cwd = _Path.cwd()
