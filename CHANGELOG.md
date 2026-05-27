@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- **fix(web): `recall_memory` HTTP path now parses time expressions** ([PR #1029](https://github.com/doobidoo/mcp-memory-service/pull/1029), @filhocf): The `/mcp` HTTP endpoint's `recall_memory` handler now extracts time expressions from the query string (e.g. "last week", "yesterday") using the same `extract_time_expression`/`parse_time_expression` pipeline as the stdio handler. Backend-optimized `recall()` is used when available; falls back to `search_memories` for backends that don't implement it.
+
 ## [10.66.1] - 2026-05-27
 
 ### Changed
