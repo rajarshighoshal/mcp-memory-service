@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Security
+
+- **fix(storage): sanitize query in BM25 log statement** ([CodeQL #440](https://github.com/doobidoo/mcp-memory-service/security/code-scanning/440)): User-supplied query string was interpolated directly into a `logger.debug` call in `sqlite_vec.py`'s BM25 search path. Now passes through the existing `_sanitize_log_value()` helper (strips `\n`, `\r`, ESC) to prevent log injection.
+
 ### Added
 
 - **fix(mcp): expose full v10 tool surface over HTTP** ([PR #1017](https://github.com/doobidoo/mcp-memory-service/pull/1017), @laanwj): `/mcp tools/list` previously advertised only 7 pre-v10 names (forked from stdio around v4, never resynced through the v10 consolidation). Now matches stdio's full v10 surface: `memory_graph`, `memory_quality`, `memory_harvest`, `memory_conflicts`, `memory_resolve`, `memory_consolidate`, `memory_ingest`, `memory_update`, `memory_stats`, `memory_store_session`, `mistake_note_add`, `mistake_note_search` are now reachable over HTTP. Pre-v10 names remain callable via the deprecation compat layer but are no longer advertised. `serverInfo.version` now reports the running package version instead of the stale `4.1.1` literal. Write-scope enforcement derived dynamically from `readOnlyHint` annotations — new tools automatically get correct scope gating without manual list maintenance. `memory_harvest` and `memory_ingest` blocked over HTTP (filesystem-path tools, stdio-only for security). Also subsumes the per-tool `recall_memory` time-expression fix from #1029 — HTTP transport now inherits stdio behavior by routing through the shared dispatcher.
