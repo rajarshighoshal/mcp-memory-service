@@ -509,19 +509,22 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.66.0** (May 26, 2026)
+## Latest Release: **v10.66.1** (May 27, 2026)
 
-**Minor: Reasoning engine (RFC #732) — transitive closure, abductive inference, entity grouping, insight cards + fix(time-filter): SQL-level enforcement**
+**Patch: fix(storage) signature alignment + fix(harvest) multi-CLI support + Kiro CLI + governance**
 
 **What's New:**
-- `feat(reasoning)`: Phase 1a — transitive closure walks multi-hop graph edges; abductive inference proposes explanations via NLI-backed scoring (PR #1009, RFC #732)
-- `feat(reasoning)`: Phase 1b — entity grouping clusters co-referenced entities across memories for cross-memory entity resolution (PR #1010)
-- `feat(reasoning)`: Phase 3 — insight cards surface synthesised memory summaries via REST API and memory_graph tool (PR #1011)
-- `fix(time-filter)`: Time-range filters now enforced at SQL `WHERE` clause level — no more out-of-window results leaking through vector scoring (PR #1014)
+- `fix(storage)`: Align `HttpClientStorage.retrieve()` signature with `BaseStorage` — adds missing `min_confidence`, `start_time`, `end_time` params (CodeQL #428)
+- `fix(harvest)`: 3-level session directory fallback: `MCP_HARVEST_SESSION_DIR` env var → `~/.claude/projects/{cwd}` → `~/.kiro/sessions/cli/` (PR #1025, @filhocf)
+- `fix(harvest)`: Expand `~` in `MCP_HARVEST_SESSION_DIR` paths via `expanduser()`
+- `fix(opencode)`: Don't use HTTPS for HTTP access to local endpoint
+- `chore(governance)`: filhocf collaborator access + CODEOWNERS expanded to `reasoning/`
+- `chore(deps)`: bump actions/checkout, snok/container-retention-policy, actions/delete-package-versions, uv group (8 packages)
 
 ---
 
 **Previous Releases**:
+- **v10.66.0** - feat(reasoning): transitive closure + abductive inference + entity grouping + insight cards (RFC #732) + fix(time-filter): SQL-level enforcement (May 26, 2026)
 - **v10.65.3** - fix(security): enforce write scope on MCP tools/call (GHSA-2r68-g678-7qr3, CVSS 8.1) + ci: restrict quality-cpu Docker to linux/amd64 (PR #1004, #1003)
 - **v10.65.1** - fix(prompts): guard `learning_session` against unresolved CLI `$N` placeholders (PR #1000) + docs: privacy-safe audit log default (PR #999)
 - **v10.65.0** - feat(opencode): `/memory` slash commands, TUI toasts, status bridge, working Solid TUI sidebar widget, session-summary dedup fix (PR #997)
