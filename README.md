@@ -509,21 +509,19 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.66.1** (May 27, 2026)
+## Latest Release: **v10.67.0** (May 28, 2026)
 
-**Patch: fix(storage) signature alignment + fix(harvest) multi-CLI support + Kiro CLI + governance**
+**Minor: feat(reasoning) NLI contradiction detection + fix(mcp) full v10 HTTP tool surface + fix(storage) BM25 log sanitization**
 
 **What's New:**
-- `fix(storage)`: Align `HttpClientStorage.retrieve()` signature with `BaseStorage` — adds missing `min_confidence`, `start_time`, `end_time` params (CodeQL #428)
-- `fix(harvest)`: 3-level session directory fallback: `MCP_HARVEST_SESSION_DIR` env var → `~/.claude/projects/{cwd}` → `~/.kiro/sessions/cli/` (PR #1025, @filhocf)
-- `fix(harvest)`: Expand `~` in `MCP_HARVEST_SESSION_DIR` paths via `expanduser()`
-- `fix(opencode)`: Don't use HTTPS for HTTP access to local endpoint
-- `chore(governance)`: filhocf collaborator access + CODEOWNERS expanded to `reasoning/`
-- `chore(deps)`: bump actions/checkout, snok/container-retention-policy, actions/delete-package-versions, uv group (8 packages)
+- `feat(reasoning)`: NLI-based contradiction detection — RFC #732 Phase 3 (PR #1027, @filhocf): 4-stage pipeline (entity gate → embedding pre-filter → heuristic NLI classifier → `contradicts` graph edge). Kill-switch via `MCP_NLI_ENABLED` (default off).
+- `fix(mcp)`: Expose full v10 tool surface over HTTP (PR #1017, @laanwj): 12 previously missing tools now reachable; `serverInfo.version` reports running package version; write-scope derived dynamically from `readOnlyHint` annotations.
+- `fix(storage)`: Sanitize BM25 log query via `_sanitize_log_value()` — prevents log injection (CodeQL #440).
 
 ---
 
 **Previous Releases**:
+- **v10.66.1** - fix(storage): HttpClientStorage.retrieve signature fix (CodeQL #428) + fix(harvest): multi-CLI session dir resolution + Kiro CLI support (PR #1025, @filhocf) (May 27, 2026)
 - **v10.66.0** - feat(reasoning): transitive closure + abductive inference + entity grouping + insight cards (RFC #732) + fix(time-filter): SQL-level enforcement (May 26, 2026)
 - **v10.65.3** - fix(security): enforce write scope on MCP tools/call (GHSA-2r68-g678-7qr3, CVSS 8.1) + ci: restrict quality-cpu Docker to linux/amd64 (PR #1004, #1003)
 - **v10.65.1** - fix(prompts): guard `learning_session` against unresolved CLI `$N` placeholders (PR #1000) + docs: privacy-safe audit log default (PR #999)

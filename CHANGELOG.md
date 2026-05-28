@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.67.0] - 2026-05-28
+
 ### Security
 
 - **fix(storage): sanitize query in BM25 log statement** ([CodeQL #440](https://github.com/doobidoo/mcp-memory-service/security/code-scanning/440)): User-supplied query string was interpolated directly into a `logger.debug` call in `sqlite_vec.py`'s BM25 search path. Now passes through the existing `_sanitize_log_value()` helper (strips `\n`, `\r`, ESC) to prevent log injection.

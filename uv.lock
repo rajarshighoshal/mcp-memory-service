@@ -1290,7 +1290,7 @@ wheels = [
 
 [[package]]
 name = "mcp-memory-service"
-version = "10.66.1"
+version = "10.67.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },
@@ -1360,6 +1360,10 @@ ml = [
     { name = "torch" },
     { name = "wandb" },
 ]
+nli = [
+    { name = "onnxruntime" },
+    { name = "transformers" },
+]
 sqlite = [
     { name = "onnxruntime" },
 ]
@@ -1389,6 +1393,7 @@ requires-dist = [
     { name = "mcp-memory-service", extras = ["sqlite", "ml"], marker = "extra == 'sqlite-ml'" },
     { name = "mcp-memory-service", extras = ["sqlite", "ml", "dev"], marker = "extra == 'full'" },
     { name = "milvus-lite", marker = "extra == 'milvus'", specifier = ">=2.4.10" },
+    { name = "onnxruntime", marker = "extra == 'nli'", specifier = ">=1.17.0" },
     { name = "onnxruntime", marker = "extra == 'sqlite'", specifier = ">=1.14.1" },
     { name = "psutil", specifier = ">=5.9.0" },
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.12.0" },
@@ -1413,12 +1418,13 @@ requires-dist = [
     { name = "torch", specifier = ">=2.0.0" },
     { name = "torch", marker = "extra == 'ml'", specifier = ">=2.0.0" },
     { name = "transformers", specifier = ">=4.30,<5.0.0" },
+    { name = "transformers", marker = "extra == 'nli'", specifier = ">=4.30.0" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'", specifier = ">=4.0.0" },
     { name = "uvicorn", specifier = ">=0.30.0" },
     { name = "wandb", marker = "extra == 'ml'", specifier = ">=0.18.0" },
     { name = "zeroconf", specifier = ">=0.130.0" },
 ]
-provides-extras = ["dev", "ml", "sqlite", "sqlite-ml", "milvus", "full"]
+provides-extras = ["dev", "ml", "nli", "sqlite", "sqlite-ml", "milvus", "full"]
 
 [[package]]
 name = "milvus-lite"
