@@ -48,6 +48,12 @@ def _is_unresolved_prompt_placeholder(value) -> bool:
     """
     return isinstance(value, str) and bool(_PROMPT_PLACEHOLDER_RE.match(value.strip()))
 
+
+def _sanitize_log_value(value: object) -> str:
+    """Sanitize a user-provided value for safe inclusion in log messages."""
+    return str(value).replace("\n", "\\n").replace("\r", "\\r").replace("\x1b", "\\x1b")
+
+
 # Import from server package modules
 from .server import (
     # Client Detection
@@ -261,7 +267,7 @@ class MemoryServer:
                     message=message
                 )
             
-            logger.debug(f"Progress {operation_id}: {progress:.0f}% - {message}")
+            logger.debug("Progress %s: %.0f%% - %s", _sanitize_log_value(operation_id), progress, _sanitize_log_value(message))
             
             # Clean up completed operations
             if progress >= 100:
@@ -2408,15 +2414,15 @@ Examples:
         # Add immediate debugging to catch any protocol issues
         if MCP_CLIENT == 'lm_studio':
             print(f"TOOL CALL INTERCEPTED: {name}", file=sys.stdout, flush=True)
-        logger.info(f"=== HANDLING TOOL CALL: {name} ===")
-        logger.info(f"Arguments: {arguments}")
+        logger.info("=== HANDLING TOOL CALL: %s ===", _sanitize_log_value(name))
+        logger.info("Arguments: %s", _sanitize_log_value(arguments))
 
         try:
             # Ensure arguments is a dict
             if arguments is None:
                 arguments = {}
 
-            logger.info(f"Processing tool: {name}")
+            logger.info("Processing tool: %s", _sanitize_log_value(name))
             if MCP_CLIENT == 'lm_studio':
                 print(f"Processing tool: {name}", file=sys.stdout, flush=True)
 
@@ -2552,11 +2558,11 @@ Examples:
                 logger.info("Calling handle_get_memory_subgraph")
                 return await self.handle_get_memory_subgraph(arguments)
             else:
-                logger.warning(f"Unknown tool requested: {name}")
+                logger.warning("Unknown tool requested: %s", _sanitize_log_value(name))
                 raise ValueError(f"Unknown tool: {name}")
         except Exception as e:
-            error_msg = f"Error in {name}: {str(e)}\n{traceback.format_exc()}"
-            logger.error(error_msg)
+            error_msg = f"Error in {_sanitize_log_value(name)}: {str(e)}\n{traceback.format_exc()}"
+            logger.error("%s", error_msg)
             print(f"ERROR in tool execution: {error_msg}", file=sys.stderr, flush=True)
             return [types.TextContent(type="text", text=f"Error: {str(e)}")]
     async def handle_store_memory(self, arguments: dict) -> List[types.TextContent]:
@@ -2746,7 +2752,7 @@ Examples:
                     if kiro_sessions.exists():
                         project_path = kiro_sessions
         else:
-            project_path = _Path(project_path)
+            project_path = _Path(project_path).resolve()
 
         if not project_path.exists():
             return [types.TextContent(
