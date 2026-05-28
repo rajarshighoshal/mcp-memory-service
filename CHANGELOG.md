@@ -10,6 +10,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.68.0] - 2026-05-28
+
+### Security
+
+- fix(security): sanitize user input in all log messages and path expressions — 32 CodeQL alerts resolved (py/log-injection x26, py/path-injection x6) across compat.py, reasoning/inference.py, server_impl.py, and 7 handler files
+
+### Added
+
+- feat(reasoning): temporal edges with valid_from/valid_until for point-in-time graph queries (RFC #1008 §4, PR #1041, @filhocf)
+- feat(reasoning): fact mutability classification — stable/volatile/ephemeral with contradiction_action() (RFC #1008 §5, PR #1042, @filhocf)
+- feat(reasoning): multi-strategy retrieval with RRF fusion — concurrent semantic+tag strategies via asyncio.gather (RFC #1008 §6, PR #1043, @filhocf)
+
+### Fixed
+
+- fix(storage): graceful fallback when sqlite-vec DELETE crashes on corrupted blob — all three delete paths now catch vec exceptions and proceed with soft-delete (closes #1037)
+- fix(reasoning): log warning when NLI backend is unimplemented — once-per-instance warning, batch-safe (PR #1036, closes #1033, @filhocf)
+- fix(scripts): handle corrupted UTF-8 in regenerate_embeddings.py via text_factory fallback (PR #1039, closes #1038, @filhocf)
+- fix(mistake_notes): increment existing note on semantic dedup rejection instead of returning error (PR #1040, closes #1034, @filhocf)
+
 ## [10.67.1] - 2026-05-28
 
 ### Security

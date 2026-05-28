@@ -509,16 +509,24 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.67.1** (May 28, 2026)
+## Latest Release: **v10.68.0** (May 28, 2026)
 
-**Patch: fix(security) enforce authentication on all /api/documents/* routes (GHSA-84hp-mqvj-3p8h, CVSSv3.1 9.8 CRITICAL)**
+**Minor: feat(reasoning) temporal edges + fact mutability + RRF fusion + security log/path sanitization**
 
 **What's New:**
-- `fix(security)`: All 7 `/api/documents/*` endpoints (upload, batch-upload, status, history, remove, remove-by-tags, search-content) now require authentication. Previously unauthenticated even when `MCP_API_KEY` or OAuth 2.1 was configured (GHSA-84hp-mqvj-3p8h, CVSSv3.1 9.8 CRITICAL, commit 907bac72).
+- `fix(security)`: 32 CodeQL alerts resolved (py/log-injection x26, py/path-injection x6) — user input sanitized across compat.py, reasoning/inference.py, server_impl.py, and 7 handler files.
+- `feat(reasoning)`: Temporal edges with valid_from/valid_until for point-in-time graph queries (RFC #1008 §4, PR #1041, @filhocf).
+- `feat(reasoning)`: Fact mutability classification — stable/volatile/ephemeral with contradiction_action() (RFC #1008 §5, PR #1042, @filhocf).
+- `feat(reasoning)`: Multi-strategy retrieval with RRF fusion — concurrent semantic+tag strategies via asyncio.gather (RFC #1008 §6, PR #1043, @filhocf).
+- `fix(storage)`: Graceful fallback when sqlite-vec DELETE crashes on corrupted blob (closes #1037).
+- `fix(reasoning)`: Log warning when NLI backend is unimplemented — once-per-instance, batch-safe (PR #1036, closes #1033, @filhocf).
+- `fix(scripts)`: Handle corrupted UTF-8 in regenerate_embeddings.py via text_factory fallback (PR #1039, closes #1038, @filhocf).
+- `fix(mistake_notes)`: Increment existing note on semantic dedup rejection instead of returning error (PR #1040, closes #1034, @filhocf).
 
 ---
 
 **Previous Releases**:
+- **v10.67.1** - fix(security): enforce auth on all /api/documents/* routes (GHSA-84hp-mqvj-3p8h, CVSSv3.1 9.8 CRITICAL, commit 907bac72) (May 28, 2026)
 - **v10.67.0** - feat(reasoning): NLI contradiction detection (RFC #732 Phase 3, PR #1027, @filhocf) + fix(mcp): full v10 HTTP tool surface (PR #1017, @laanwj) + fix(storage): BM25 log sanitization (CodeQL #440) (May 28, 2026)
 - **v10.66.1** - fix(storage): HttpClientStorage.retrieve signature fix (CodeQL #428) + fix(harvest): multi-CLI session dir resolution + Kiro CLI support (PR #1025, @filhocf) (May 27, 2026)
 - **v10.66.0** - feat(reasoning): transitive closure + abductive inference + entity grouping + insight cards (RFC #732) + fix(time-filter): SQL-level enforcement (May 26, 2026)
