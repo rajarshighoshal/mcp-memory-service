@@ -408,6 +408,17 @@ export MCP_EXTERNAL_EMBEDDING_API_KEY=sk-xxx  # Optional
 
 **Target:** All complexity A-B grade (complexity ≤8)
 
+**Log Injection Guard** (added v10.68.0 — CodeQL GHSA-84hp-mqvj-3p8h lessons):
+- **NEVER** log user-provided values in raw f-strings: `logger.info(f"Stored: {content}")` → CodeQL `py/log-injection`
+- **ALWAYS** wrap with `_sanitize_log_value()` from `src/mcp_memory_service/compat.py`:
+  ```python
+  from mcp_memory_service.compat import _sanitize_log_value
+  logger.info(f"Stored: {_sanitize_log_value(content)}")
+  ```
+- `_sanitize_log_value()` strips `\n`, `\r`, `\x1b` — prevents log-forging and ANSI injection
+- `pre_pr_check.sh` now detects f-string logger calls without this wrapper (check 6.5)
+- Path injection: always validate with `Path(user_input).resolve()` and check it's under the expected base dir
+
 ### External Data Parsers
 - **Always inspect real data first**: Download and inspect a sample of the real data BEFORE writing parsers or tests. Never trust API docs or project pages alone — real JSON structures often differ from descriptions (e.g., LoCoMo observations are nested dicts, not newline-separated strings).
 
