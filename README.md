@@ -509,23 +509,19 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.68.0** (May 28, 2026)
+## Latest Release: **v10.69.0** (May 28, 2026)
 
-**Minor: feat(reasoning) temporal edges + fact mutability + RRF fusion + security log/path sanitization**
+**Minor: feat(mistake_notes) update+delete tools + fix(ci) Docker multi-arch pull + chore(ci) log-injection guard**
 
 **What's New:**
-- `fix(security)`: 32 CodeQL alerts resolved (py/log-injection x26, py/path-injection x6) — user input sanitized across compat.py, reasoning/inference.py, server_impl.py, and 7 handler files.
-- `feat(reasoning)`: Temporal edges with valid_from/valid_until for point-in-time graph queries (RFC #1008 §4, PR #1041, @filhocf).
-- `feat(reasoning)`: Fact mutability classification — stable/volatile/ephemeral with contradiction_action() (RFC #1008 §5, PR #1042, @filhocf).
-- `feat(reasoning)`: Multi-strategy retrieval with RRF fusion — concurrent semantic+tag strategies via asyncio.gather (RFC #1008 §6, PR #1043, @filhocf).
-- `fix(storage)`: Graceful fallback when sqlite-vec DELETE crashes on corrupted blob (closes #1037).
-- `fix(reasoning)`: Log warning when NLI backend is unimplemented — once-per-instance, batch-safe (PR #1036, closes #1033, @filhocf).
-- `fix(scripts)`: Handle corrupted UTF-8 in regenerate_embeddings.py via text_factory fallback (PR #1039, closes #1038, @filhocf).
-- `fix(mistake_notes)`: Increment existing note on semantic dedup rejection instead of returning error (PR #1040, closes #1034, @filhocf).
+- `feat(mistake_notes)`: Add `mistake_note_update` and `mistake_note_delete` MCP tools — update failure_count or content fields; delete by content_hash; both validate `memory_type='mistake'` before operating (closes #1035, PR #1045, @filhocf).
+- `fix(ci)`: Disable buildx provenance+sbom attestations in publish-docker job — ghcr.io multi-arch index referenced attestation manifests instead of platform layers, causing `manifest unknown` on docker pull (fixes #1044).
+- `chore(ci)`: pre_pr_check.sh now flags f-string logger calls missing `_sanitize_log_value()` (check 6.5) — catches py/log-injection locally before CodeQL runs; CLAUDE.md documents the Log Injection Guard pattern.
 
 ---
 
 **Previous Releases**:
+- **v10.68.0** - feat(reasoning): temporal edges + fact mutability + RRF fusion (RFC #1008, @filhocf) + fix(security): 32 CodeQL log/path-injection alerts resolved (May 28, 2026)
 - **v10.67.1** - fix(security): enforce auth on all /api/documents/* routes (GHSA-84hp-mqvj-3p8h, CVSSv3.1 9.8 CRITICAL, commit 907bac72) (May 28, 2026)
 - **v10.67.0** - feat(reasoning): NLI contradiction detection (RFC #732 Phase 3, PR #1027, @filhocf) + fix(mcp): full v10 HTTP tool surface (PR #1017, @laanwj) + fix(storage): BM25 log sanitization (CodeQL #440) (May 28, 2026)
 - **v10.66.1** - fix(storage): HttpClientStorage.retrieve signature fix (CodeQL #428) + fix(harvest): multi-CLI session dir resolution + Kiro CLI support (PR #1025, @filhocf) (May 27, 2026)

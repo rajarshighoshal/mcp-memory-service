@@ -10,11 +10,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.69.0] - 2026-05-28
+
+### Added
+
+- feat(mistake_notes): add `mistake_note_update` and `mistake_note_delete` MCP tools — update failure_count or content fields; delete by content_hash; both validate `memory_type='mistake'` before operating (closes #1035, PR #1045, @filhocf)
+
+### Fixed
+
+- fix(ci): disable buildx provenance+sbom attestations in publish-docker job — ghcr.io multi-arch index referenced attestation manifests instead of platform layers, causing `manifest unknown` on pull (fixes #1044)
+
 ### Changed
 
 - chore(ci): pre_pr_check.sh now flags f-string logger calls missing `_sanitize_log_value()` (check 6.5) — catches py/log-injection locally before CodeQL runs; CLAUDE.md documents the Log Injection Guard pattern
-- feat(mistake_notes): add `mistake_note_update` and `mistake_note_delete` MCP tools — update failure_count or content fields; delete by content_hash; both validate `memory_type='mistake'` before operating (closes #1035, PR #1045, @filhocf)
-- fix(ci): disable buildx provenance+sbom attestations in publish-docker job — ghcr.io multi-arch index referenced attestation manifests instead of platform layers, causing `manifest unknown` on pull (fixes #1044)
 
 ## [10.68.0] - 2026-05-28
 
