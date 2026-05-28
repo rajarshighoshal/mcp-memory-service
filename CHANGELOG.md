@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.67.1] - 2026-05-28
+
+### Security
+
+- **fix(security): enforce authentication on all `/api/documents/*` routes** (GHSA-84hp-mqvj-3p8h, CVSSv3.1 9.8 CRITICAL, commit 907bac72): All 7 document endpoints (upload, batch-upload, status, history, remove, remove-by-tags, search-content) were served without any auth check, allowing unauthenticated access even when `MCP_API_KEY` or OAuth 2.1 was configured.
+
 ## [10.67.0] - 2026-05-28
 
 ### Security

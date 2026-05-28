@@ -509,18 +509,17 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.67.0** (May 28, 2026)
+## Latest Release: **v10.67.1** (May 28, 2026)
 
-**Minor: feat(reasoning) NLI contradiction detection + fix(mcp) full v10 HTTP tool surface + fix(storage) BM25 log sanitization**
+**Patch: fix(security) enforce authentication on all /api/documents/* routes (GHSA-84hp-mqvj-3p8h, CVSSv3.1 9.8 CRITICAL)**
 
 **What's New:**
-- `feat(reasoning)`: NLI-based contradiction detection — RFC #732 Phase 3 (PR #1027, @filhocf): 4-stage pipeline (entity gate → embedding pre-filter → heuristic NLI classifier → `contradicts` graph edge). Kill-switch via `MCP_NLI_ENABLED` (default off).
-- `fix(mcp)`: Expose full v10 tool surface over HTTP (PR #1017, @laanwj): 12 previously missing tools now reachable; `serverInfo.version` reports running package version; write-scope derived dynamically from `readOnlyHint` annotations.
-- `fix(storage)`: Sanitize BM25 log query via `_sanitize_log_value()` — prevents log injection (CodeQL #440).
+- `fix(security)`: All 7 `/api/documents/*` endpoints (upload, batch-upload, status, history, remove, remove-by-tags, search-content) now require authentication. Previously unauthenticated even when `MCP_API_KEY` or OAuth 2.1 was configured (GHSA-84hp-mqvj-3p8h, CVSSv3.1 9.8 CRITICAL, commit 907bac72).
 
 ---
 
 **Previous Releases**:
+- **v10.67.0** - feat(reasoning): NLI contradiction detection (RFC #732 Phase 3, PR #1027, @filhocf) + fix(mcp): full v10 HTTP tool surface (PR #1017, @laanwj) + fix(storage): BM25 log sanitization (CodeQL #440) (May 28, 2026)
 - **v10.66.1** - fix(storage): HttpClientStorage.retrieve signature fix (CodeQL #428) + fix(harvest): multi-CLI session dir resolution + Kiro CLI support (PR #1025, @filhocf) (May 27, 2026)
 - **v10.66.0** - feat(reasoning): transitive closure + abductive inference + entity grouping + insight cards (RFC #732) + fix(time-filter): SQL-level enforcement (May 26, 2026)
 - **v10.65.3** - fix(security): enforce write scope on MCP tools/call (GHSA-2r68-g678-7qr3, CVSS 8.1) + ci: restrict quality-cpu Docker to linux/amd64 (PR #1004, #1003)
