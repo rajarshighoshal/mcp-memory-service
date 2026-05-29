@@ -509,18 +509,18 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.70.0** (May 29, 2026)
+## Latest Release: **v10.70.1** (May 29, 2026)
 
-**Minor: feat(search) multi-signal ranked search mode + fix(security) CodeQL path-injection dismissals + fix(ci) version badge**
+**Patch: feat(auto-capture) memory_observe + auto_extract + harvest pipeline + fix(ci) Docker multi-arch push 404**
 
 **What's New:**
-- `feat(search)`: Multi-signal ranked search mode (`mode="ranked"`) combining semantic similarity, time decay, access frequency, and quality scores via configurable weights; tag/time filtering delegated to shared post-retrieve tail with 5x oversample when filters active (RFC #1008 §2, closes #1028, PR #1046, @filhocf).
-- `fix(security)`: Dismiss 9 CodeQL `py/path-injection` false positives via API — paths are user-specified by design in authenticated MCP tool calls; remove unused `import tempfile` from `handlers/documents.py`.
-- `fix(ci)`: Update `docs/index.html` version badge to v10.69.0 — resolves version-drift-check CI failure.
+- `feat(auto-capture)`: `memory_observe`, `auto_extract`, and harvest pipeline — passive background capture, intent-driven extraction, and batch harvest ingestion (RFC #1008 §3, closes #1032, PR #1047, @filhocf).
+- `fix(ci)`: Remove GHA build cache from `publish-docker` step — cache hits caused buildx to push only the index manifest while skipping platform layer uploads to GHCR, resulting in 404 on `docker pull` for all multi-arch tags since v10.66 (issue #1044, @jonatanbellido).
 
 ---
 
 **Previous Releases**:
+- **v10.70.0** - feat(search): multi-signal ranked search mode (`mode="ranked"`) + fix(security): 9 CodeQL path-injection dismissals + fix(ci): version badge (May 29, 2026)
 - **v10.69.0** - feat(mistake_notes): `mistake_note_update` + `mistake_note_delete` MCP tools + fix(ci): Docker multi-arch pull + chore(ci): log-injection guard in pre_pr_check.sh (May 28, 2026)
 - **v10.68.0** - feat(reasoning): temporal edges + fact mutability + RRF fusion (RFC #1008, @filhocf) + fix(security): 32 CodeQL log/path-injection alerts resolved (May 28, 2026)
 - **v10.67.1** - fix(security): enforce auth on all /api/documents/* routes (GHSA-84hp-mqvj-3p8h, CVSSv3.1 9.8 CRITICAL, commit 907bac72) (May 28, 2026)
