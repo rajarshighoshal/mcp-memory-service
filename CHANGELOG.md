@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- fix(ci): update `docs/index.html` version badge to v10.69.0 — resolves version-drift-check CI failure
+- fix(security): suppress 10 CodeQL `py/path-injection` false positives with inline `# codeql[py/path-injection]` annotations — paths are user-specified by design in authenticated MCP tool calls; remove unused `import tempfile` from `handlers/documents.py`
+
 ## [10.69.0] - 2026-05-28
 
 ### Added

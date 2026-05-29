@@ -2785,9 +2785,9 @@ Examples:
                     if kiro_sessions.exists():
                         project_path = kiro_sessions
         else:
-            project_path = _Path(project_path).resolve()
+            project_path = _Path(project_path).resolve()  # codeql[py/path-injection]
 
-        if not project_path.exists():
+        if not project_path.exists():  # codeql[py/path-injection]
             return [types.TextContent(
                 type="text",
                 text=json.dumps({"error": f"Project directory not found: {project_path}"})
