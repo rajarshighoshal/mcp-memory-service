@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.70.0] - 2026-05-29
+
 ### Added
 
 - feat(search): multi-signal ranked search mode (`mode="ranked"`) combining semantic similarity, time decay, access frequency, and quality scores via configurable weights; tag/time filtering delegated to shared post-retrieve tail with 5× oversample when filters active (RFC #1008 §2, closes #1028, PR #1046, @filhocf)
@@ -18,6 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - fix(ci): update `docs/index.html` version badge to v10.69.0 — resolves version-drift-check CI failure
 - fix(security): dismiss 9 CodeQL `py/path-injection` false positives via API — paths are user-specified by design in authenticated MCP tool calls; remove unused `import tempfile` from `handlers/documents.py`
+
+### Changed
+
+- docs(claude): clarify landing page update is MANDATORY on every MINOR/MAJOR release — version-drift-check CI gate enforces it
 
 ## [10.69.0] - 2026-05-28
 

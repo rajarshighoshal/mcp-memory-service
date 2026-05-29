@@ -509,18 +509,19 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.69.0** (May 28, 2026)
+## Latest Release: **v10.70.0** (May 29, 2026)
 
-**Minor: feat(mistake_notes) update+delete tools + fix(ci) Docker multi-arch pull + chore(ci) log-injection guard**
+**Minor: feat(search) multi-signal ranked search mode + fix(security) CodeQL path-injection dismissals + fix(ci) version badge**
 
 **What's New:**
-- `feat(mistake_notes)`: Add `mistake_note_update` and `mistake_note_delete` MCP tools — update failure_count or content fields; delete by content_hash; both validate `memory_type='mistake'` before operating (closes #1035, PR #1045, @filhocf).
-- `fix(ci)`: Disable buildx provenance+sbom attestations in publish-docker job — ghcr.io multi-arch index referenced attestation manifests instead of platform layers, causing `manifest unknown` on docker pull (fixes #1044).
-- `chore(ci)`: pre_pr_check.sh now flags f-string logger calls missing `_sanitize_log_value()` (check 6.5) — catches py/log-injection locally before CodeQL runs; CLAUDE.md documents the Log Injection Guard pattern.
+- `feat(search)`: Multi-signal ranked search mode (`mode="ranked"`) combining semantic similarity, time decay, access frequency, and quality scores via configurable weights; tag/time filtering delegated to shared post-retrieve tail with 5x oversample when filters active (RFC #1008 §2, closes #1028, PR #1046, @filhocf).
+- `fix(security)`: Dismiss 9 CodeQL `py/path-injection` false positives via API — paths are user-specified by design in authenticated MCP tool calls; remove unused `import tempfile` from `handlers/documents.py`.
+- `fix(ci)`: Update `docs/index.html` version badge to v10.69.0 — resolves version-drift-check CI failure.
 
 ---
 
 **Previous Releases**:
+- **v10.69.0** - feat(mistake_notes): `mistake_note_update` + `mistake_note_delete` MCP tools + fix(ci): Docker multi-arch pull + chore(ci): log-injection guard in pre_pr_check.sh (May 28, 2026)
 - **v10.68.0** - feat(reasoning): temporal edges + fact mutability + RRF fusion (RFC #1008, @filhocf) + fix(security): 32 CodeQL log/path-injection alerts resolved (May 28, 2026)
 - **v10.67.1** - fix(security): enforce auth on all /api/documents/* routes (GHSA-84hp-mqvj-3p8h, CVSSv3.1 9.8 CRITICAL, commit 907bac72) (May 28, 2026)
 - **v10.67.0** - feat(reasoning): NLI contradiction detection (RFC #732 Phase 3, PR #1027, @filhocf) + fix(mcp): full v10 HTTP tool surface (PR #1017, @laanwj) + fix(storage): BM25 log sanitization (CodeQL #440) (May 28, 2026)
