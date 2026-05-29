@@ -509,16 +509,17 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.70.2** (May 29, 2026)
+## Latest Release: **v10.70.3** (May 29, 2026)
 
-**Patch: fix(security) wrap log f-strings in storage/graph.py with _sanitize_log_value() — resolves CodeQL py/log-injection alerts #483-#486**
+**Patch: fix(ci) multi-arch-safe GHCR cleanup — Docker pull 404s resolved for all multi-arch tags**
 
 **What's New:**
-- `fix(security)`: Wrap log f-strings in `storage/graph.py` with `_sanitize_log_value()` — resolves CodeQL `py/log-injection` alerts #483–#486 (`source_hash`, `target_hash`, `relationship_type`); alert #467 (`py/unused-global-variable` for `MCP_AUTO_EXTRACT_DEFAULT`) dismissed as false positive (PR #1048).
+- `fix(ci)`: Replace `actions/delete-package-versions` with `dataaxiom/ghcr-cleanup-action` and remove the `workflow_run`-after-release trigger — the old cleanup deleted per-platform manifests minutes after publish, causing `docker pull` 404s for all multi-arch tags since v10.66. Fresh platform manifests now survive cleanup (issue #1044, @jonatanbellido, PR #1052).
 
 ---
 
 **Previous Releases**:
+- **v10.70.2** - fix(security): wrap log f-strings in `storage/graph.py` with `_sanitize_log_value()` — CodeQL `py/log-injection` alerts #483–#486 (May 29, 2026)
 - **v10.70.1** - feat(auto-capture): memory_observe + auto_extract + harvest pipeline (RFC #1008 §3, @filhocf) + fix(ci): Docker multi-arch push 404 (May 29, 2026)
 - **v10.70.0** - feat(search): multi-signal ranked search mode (`mode="ranked"`) + fix(security): 9 CodeQL path-injection dismissals + fix(ci): version badge (May 29, 2026)
 - **v10.69.0** - feat(mistake_notes): `mistake_note_update` + `mistake_note_delete` MCP tools + fix(ci): Docker multi-arch pull + chore(ci): log-injection guard in pre_pr_check.sh (May 28, 2026)

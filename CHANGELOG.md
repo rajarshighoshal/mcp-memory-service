@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.70.3] - 2026-05-29
+
+### Fixed
+
+- fix(ci): multi-arch-safe GHCR cleanup — replace `actions/delete-package-versions` with `dataaxiom/ghcr-cleanup-action` and remove the `workflow_run`-after-release trigger. The old cleanup deleted per-platform manifests (untagged children of the multi-arch index) minutes after each publish, causing `docker pull` 404s for all multi-arch tags since v10.66. This release re-publishes fresh platform manifests that now survive cleanup (issue #1044, diagnosis by @jonatanbellido) (PR #1052)
+
 ## [10.70.2] - 2026-05-29
 
 ### Fixed
