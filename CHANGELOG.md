@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Fixed
+- fix(ci): remove GHA build cache from `publish-docker` step — cache hits caused buildx to push only the index manifest while skipping platform layer uploads to GHCR, resulting in 404 on `docker pull` for all multi-arch tags since v10.66 (issue #1044, @jonatanbellido)
+
 ## [10.70.0] - 2026-05-29
 
 ### Added
