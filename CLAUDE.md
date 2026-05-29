@@ -37,7 +37,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 ### Release Workflow Checklist
 Before merging or releasing:
 1. Verify CI is green on the target branch (`gh run list --branch <branch>`)
-2. Check landing page version (`docs/index.html`) against latest tag — update if stale (MINOR/MAJOR only)
+2. **Update `docs/index.html` version strings** whenever MAJOR.MINOR changes (i.e. every MINOR or MAJOR release — PATCH releases are exempt). The `version-drift-check` CI gate enforces this and will fail if skipped. Update ALL occurrences: `<title>`, `<meta og:title>`, release link `href`. Use `grep -n "v10\." docs/index.html` to find them. This is MANDATORY — not optional for "incremental" releases.
 3. Clean up merged branches after release (`git branch -d`, `git push origin --delete`)
 4. Use `github-release-manager` agent — never manually bump versions
 
