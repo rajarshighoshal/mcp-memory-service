@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [10.70.2] - 2026-05-29
+
+### Fixed
+
+- fix(security): wrap log f-strings in `storage/graph.py` with `_sanitize_log_value()` — resolves CodeQL `py/log-injection` alerts #483–#486 (`source_hash`, `target_hash`, `relationship_type`); alert #467 (`py/unused-global-variable` for `MCP_AUTO_EXTRACT_DEFAULT`) dismissed as false positive — imported via lazy cross-module import in `server/handlers/memory.py` (PR #1048)
+
 ## [10.70.1] - 2026-05-29
 
 ### Added

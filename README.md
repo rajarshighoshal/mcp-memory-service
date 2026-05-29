@@ -509,17 +509,17 @@ The `:quality-cpu` image pre-exports both models at build time and ships only `o
 ---
 
 
-## Latest Release: **v10.70.1** (May 29, 2026)
+## Latest Release: **v10.70.2** (May 29, 2026)
 
-**Patch: feat(auto-capture) memory_observe + auto_extract + harvest pipeline + fix(ci) Docker multi-arch push 404**
+**Patch: fix(security) wrap log f-strings in storage/graph.py with _sanitize_log_value() — resolves CodeQL py/log-injection alerts #483-#486**
 
 **What's New:**
-- `feat(auto-capture)`: `memory_observe`, `auto_extract`, and harvest pipeline — passive background capture, intent-driven extraction, and batch harvest ingestion (RFC #1008 §3, closes #1032, PR #1047, @filhocf).
-- `fix(ci)`: Remove GHA build cache from `publish-docker` step — cache hits caused buildx to push only the index manifest while skipping platform layer uploads to GHCR, resulting in 404 on `docker pull` for all multi-arch tags since v10.66 (issue #1044, @jonatanbellido).
+- `fix(security)`: Wrap log f-strings in `storage/graph.py` with `_sanitize_log_value()` — resolves CodeQL `py/log-injection` alerts #483–#486 (`source_hash`, `target_hash`, `relationship_type`); alert #467 (`py/unused-global-variable` for `MCP_AUTO_EXTRACT_DEFAULT`) dismissed as false positive (PR #1048).
 
 ---
 
 **Previous Releases**:
+- **v10.70.1** - feat(auto-capture): memory_observe + auto_extract + harvest pipeline (RFC #1008 §3, @filhocf) + fix(ci): Docker multi-arch push 404 (May 29, 2026)
 - **v10.70.0** - feat(search): multi-signal ranked search mode (`mode="ranked"`) + fix(security): 9 CodeQL path-injection dismissals + fix(ci): version badge (May 29, 2026)
 - **v10.69.0** - feat(mistake_notes): `mistake_note_update` + `mistake_note_delete` MCP tools + fix(ci): Docker multi-arch pull + chore(ci): log-injection guard in pre_pr_check.sh (May 28, 2026)
 - **v10.68.0** - feat(reasoning): temporal edges + fact mutability + RRF fusion (RFC #1008, @filhocf) + fix(security): 32 CodeQL log/path-injection alerts resolved (May 28, 2026)
