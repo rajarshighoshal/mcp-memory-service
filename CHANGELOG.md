@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- fix(mistake-notes): reject empty/whitespace-only `correct_action` in `mistake_note_add` and `mistake_note_update`. JSON-schema `required` enforces presence, not non-emptiness, so a blank `correct_action` previously passed validation and stored a mistake note with an error pattern but no remediation. Both add and update now return a clear validation error instead (issue #1055, PR #1057, @Aigen-Protocol)
+
 ## [10.70.3] - 2026-05-29
 
 ### Fixed
