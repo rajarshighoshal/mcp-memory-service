@@ -507,7 +507,7 @@ class DreamInspiredConsolidator:
                 last_run = (now - timedelta(days=1)).timestamp()
             end_time = now.timestamp()
             memories = await self.storage.get_memories_by_time_range(
-                last_run, end_time,
+                last_run, end_time, include_embeddings=True,
             )
             return memories
 
@@ -517,7 +517,7 @@ class DreamInspiredConsolidator:
             start_time = (now - timedelta(days=cutoff_days)).timestamp()
             end_time = now.timestamp()
             memories = await self.storage.get_memories_by_time_range(
-                start_time, end_time,
+                start_time, end_time, include_embeddings=True,
             )
         else:
             # For longer horizons: incremental oldest-first processing
